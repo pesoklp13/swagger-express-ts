@@ -6,11 +6,7 @@ export interface IApiOperationDeleteArgs extends IApiOperationArgsBase {}
 export function ApiOperationDelete(
   args: IApiOperationDeleteArgs
 ): MethodDecorator {
-  return (
-    target: any,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor
-  ) => {
+  return (target: any, propertyKey: string | symbol) => {
     SwaggerService.getInstance().addOperationDelete(args, target, propertyKey);
   };
 }

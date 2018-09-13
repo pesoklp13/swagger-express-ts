@@ -146,7 +146,7 @@ export interface ISwaggerBuildDefinition {
    * Define global responses.
    * Optional.
    */
-  responses?: { [key: string]: IApiOperationArgsBaseResponse };
+  responses?: { [key: number]: IApiOperationArgsBaseResponse };
 }
 
 export function build(buildDefinition: ISwaggerBuildDefinition): void {

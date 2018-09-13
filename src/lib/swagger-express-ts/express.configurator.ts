@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import { SwaggerService } from "./swagger.service";
 import * as assert from "assert";
 import { build, ISwaggerBuildDefinition } from "./swagger.builder";

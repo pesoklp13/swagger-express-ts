@@ -10,11 +10,11 @@ import {
 import {
   ApiOperationGet,
   ApiOperationPost,
-  ApiPath,
-  SwaggerDefinitionConstant
+  ApiPath
 } from "../lib/swagger-express-ts";
 import { VersionsService } from "./versions.service";
 import { VersionModel } from "./version.model";
+import { DataType } from "../lib/swagger-express-ts/i-api-operation-args.base";
 
 @ApiPath({
   path: "/versions",
@@ -36,7 +36,7 @@ export class VersionsController implements interfaces.Controller {
     summary: "Get versions list",
     responses: {
       200: {
-        type: SwaggerDefinitionConstant.Response.Type.ARRAY,
+        type: DataType.array,
         model: "Version"
       }
     },
@@ -47,8 +47,7 @@ export class VersionsController implements interfaces.Controller {
   @httpGet("/")
   public getVersions(
     request: express.Request,
-    response: express.Response,
-    next: express.NextFunction
+    response: express.Response
   ): void {
     response.json(this.versionsService.getVersions());
   }
@@ -92,8 +91,7 @@ export class VersionsController implements interfaces.Controller {
   @httpPost("/")
   public postVersion(
     request: express.Request,
-    response: express.Response,
-    next: express.NextFunction
+    response: express.Response
   ): void {
     if (!request.body) {
       return response.status(400).end();

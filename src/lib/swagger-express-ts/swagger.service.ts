@@ -1,15 +1,11 @@
 import {
   ISwagger,
-  ISwaggerContact,
-  ISwaggerDefinition,
+  ISwaggerContact,ISwaggerDefinition,
   ISwaggerDefinitionProperty,
   ISwaggerExternalDocs,
   ISwaggerInfo,
-  ISwaggerLicense,
-  ISwaggerOperation,
+  ISwaggerLicense,ISwaggerOperation,
   ISwaggerOperationParameter,
-  ISwaggerOperationResponse,
-  ISwaggerOperationSchema,
   ISwaggerPath,
   ISwaggerTag
 } from "./i-swagger";
@@ -31,6 +27,10 @@ import {
   ISwaggerBuildDefinitionModelProperty,
   ISwaggerSecurityDefinition
 } from "./swagger.builder";
+import { ReferenceBuilder } from "./builders/reference.builder";
+import { ResponseBuilder } from "./builders/response.builder";
+
+type OperationMethods = "get" | "post" | "put" | "patch" | "delete";
 import {
   NotEmpty,
   Pattern,
@@ -70,6 +70,8 @@ export class SwaggerService {
   private controllerMap: IController[] = [];
   private data: ISwagger;
   private modelsMap: { [key: string]: ISwaggerBuildDefinitionModel } = {};
+  private refBuilder: ReferenceBuilder = new ReferenceBuilder();
+  private responseBuilder: ResponseBuilder = new ResponseBuilder();
 
   private constructor() {}
 
@@ -127,9 +129,7 @@ export class SwaggerService {
 
   @Validate
   public setHost(
-    @Pattern({ pattern: PatternEnum.HOST, path: "host" })
-    host: string
-  ): void {
+    @Pattern({ pattern: PatternEnum.HOST, path: "host" })host: string): void {
     this.data.host = host;
   }
 
@@ -179,10 +179,12 @@ export class SwaggerService {
                 )
               ) {
                 newProperty.items = {
-                  $ref: SwaggerService.buildRef(property.model)
+                  $ref: this.refBuilder.withValue(property.model).build()
                 };
               } else {
-                newProperty.$ref = SwaggerService.buildRef(property.model);
+                newProperty.$ref = this.refBuilder
+                  .withValue(property.model)
+                  .build();
               }
             }
             if (property.required) {
@@ -200,16 +202,16 @@ export class SwaggerService {
 
   @Validate
   public setExternalDocs(
-    @Pattern({ pattern: PatternEnum.URI, path: "url" })
-    externalDocs: ISwaggerExternalDocs
-  ): void {
+    @Pattern({ pattern: PatternEnum.URI, path: "url" })externalDocs: ISwaggerExternalDocs): void {
     this.data.externalDocs = externalDocs;
   }
 
   public setGlobalResponses(globalResponses: {
     [key: string]: IApiOperationArgsBaseResponse;
   }): void {
-    this.data.responses = this.buildOperationResponses(globalResponses);
+    this.data.responses = this.responseBuilder
+      .withResponses(globalResponses)
+      .build();
   }
 
   public addPath(args: IApiPathArgs, target: any): void {
@@ -352,21 +354,20 @@ export class SwaggerService {
         } else {
           data.paths[controller.path] = {};
         }
-
-        const tag: ISwaggerTag = {
+        const tag: ISwaggerTag ={
           name: controller.name
-        };
+          };
 
         if (controller.description) {
           tag.description = controller.description;
         }
 
-        this.addTag(data.tags, tag);
+    this.addTag(data.tags, tag);
       }
     }
 
     this.data = data;
-    this.data.tags = Array.from(this.data.tags);
+    this.data .tags = Array.from(this.data.tags);
   }
 
   public addApiModel(args: IApiModelArgs, target: any): any {
@@ -448,10 +449,8 @@ export class SwaggerService {
     license: ISwaggerLicense
   ) {
     this.data.info.license = license;
-  }
-
-  private addOperation(
-    operation: string,
+  }private addOperation(
+    operation: OperationMethods,
     args: IApiOperationArgsBase,
     target: any,
     propertyKey: string | symbol
@@ -498,27 +497,9 @@ export class SwaggerService {
 
     currentPath = _.mergeWith(currentController.paths[path], currentPath);
 
-    if ("get" === operation) {
-      currentPath.get = this.buildOperation(args, target, propertyKey);
-    }
-
-    if ("post" === operation) {
-      currentPath.post = this.buildOperation(args, target, propertyKey);
-    }
-
-    if ("put" === operation) {
-      currentPath.put = this.buildOperation(args, target, propertyKey);
-    }
-
-    if ("patch" === operation) {
-      currentPath.patch = this.buildOperation(args, target, propertyKey);
-    }
-
-    if ("delete" === operation) {
-      currentPath.delete = this.buildOperation(args, target, propertyKey);
-    }
-
-    _.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
+    (currentPath as any)[operation] = this.buildOperation(args, propertyKey);
+    this.controllerMap[target.constructor.name] = currentController;
+_.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
       this.addTag(this.data.tags, tag)
     );
   }
@@ -536,7 +517,6 @@ export class SwaggerService {
 
   private buildOperation(
     args: IApiOperationArgsBase,
-    target: any,
     propertyKey: string | symbol
   ): ISwaggerOperation {
     const operation: ISwaggerOperation = {
@@ -596,7 +576,7 @@ export class SwaggerService {
         }
 
         newParameterBody.schema = {
-          $ref: SwaggerService.buildRef(args.parameters.body.model)
+          $ref: this.refBuilder.withValue(args.parameters.body.model).build()
         };
         operation.parameters.push(newParameterBody);
       }
@@ -612,7 +592,9 @@ export class SwaggerService {
     }
 
     if (args.responses) {
-      operation.responses = this.buildOperationResponses(args.responses);
+      operation.responses = this.responseBuilder
+        .withResponses(args.responses)
+    .build();
     }
 
     if (args.security) {
@@ -620,130 +602,6 @@ export class SwaggerService {
     }
 
     return operation;
-  }
-
-  @Validate
-  private buildOperationResponses(@NotEmpty()
-  responses: {
-    [key: string]: IApiOperationArgsBaseResponse;
-  }): {
-    [key: string]: ISwaggerOperationResponse;
-  } {
-    const swaggerOperationResponses: {
-      [key: string]: ISwaggerOperationResponse;
-    } = {};
-    for (const responseIndex in responses) {
-      if (responses.hasOwnProperty(responseIndex)) {
-        const response: IApiOperationArgsBaseResponse =
-          responses[responseIndex];
-        const newSwaggerOperationResponse: ISwaggerOperationResponse = {};
-        if (response.description) {
-          newSwaggerOperationResponse.description = response.description;
-        } else {
-          switch (responseIndex) {
-            case "200":
-              newSwaggerOperationResponse.description = "Success";
-              break;
-            case "201":
-              newSwaggerOperationResponse.description = "Created";
-              break;
-            case "202":
-              newSwaggerOperationResponse.description = "Accepted";
-              break;
-            case "203":
-              newSwaggerOperationResponse.description =
-                "Non-Authoritative Information";
-              break;
-            case "204":
-              newSwaggerOperationResponse.description = "No Content";
-              break;
-            case "205":
-              newSwaggerOperationResponse.description = "Reset Content";
-              break;
-            case "206":
-              newSwaggerOperationResponse.description = "Partial Content";
-              break;
-            case "400":
-              newSwaggerOperationResponse.description =
-                "Client error and Bad Request";
-              break;
-            case "401":
-              newSwaggerOperationResponse.description =
-                "Client error and Unauthorized";
-              break;
-            case "404":
-              newSwaggerOperationResponse.description =
-                "Client error and Not Found";
-              break;
-            case "406":
-              newSwaggerOperationResponse.description =
-                "Client error and Not Acceptable";
-              break;
-            case "500":
-              newSwaggerOperationResponse.description = "Internal Server Error";
-              break;
-            case "501":
-              newSwaggerOperationResponse.description = "Not Implemented";
-              break;
-            case "503":
-              newSwaggerOperationResponse.description = "Service Unavailable";
-              break;
-            default:
-              throw new Error(
-                "Response object's description property is required"
-              );
-          }
-        }
-        if (response.model) {
-          const ref = SwaggerService.buildRef(response.model);
-          let newSwaggerOperationResponseSchema: ISwaggerOperationSchema = {
-            $ref: ref
-          };
-          if (
-            _.isEqual(
-              response.type,
-              SwaggerDefinitionConstant.Response.Type.ARRAY
-            )
-          ) {
-            newSwaggerOperationResponseSchema = {
-              items: {
-                $ref: ref
-              },
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            };
-          }
-          newSwaggerOperationResponse.schema = newSwaggerOperationResponseSchema;
-        } else if (response.type) {
-          if (
-            _.isEqual(
-              response.type,
-              SwaggerDefinitionConstant.Response.Type.ARRAY
-            ) ||
-            _.isEqual(
-              response.type,
-              SwaggerDefinitionConstant.Response.Type.OBJECT
-            )
-          ) {
-            throw new Error(
-              "Invalid response schema for type " + response.type
-            );
-          }
-
-          const newSwaggerOperationResponseSchema: ISwaggerOperationSchema = {
-            type: response.type
-          };
-
-          if (response.format) {
-            newSwaggerOperationResponseSchema.format = response.format;
-          }
-
-          newSwaggerOperationResponse.schema = newSwaggerOperationResponseSchema;
-        }
-
-        swaggerOperationResponses[responseIndex] = newSwaggerOperationResponse;
-      }
-    }
-    return swaggerOperationResponses;
   }
 
   private static buildOperationSecurity(argsSecurity: {
@@ -815,6 +673,7 @@ export class SwaggerService {
       operation.deprecated = controller.deprecated;
     }
 
+
     if (!operation.tags) {
       operation.tags = [];
     }
@@ -822,10 +681,6 @@ export class SwaggerService {
     operation.tags.unshift(_.upperFirst(controller.name));
 
     return operation;
-  }
-
-  private static buildRef(definition: string): string {
-    return "#/definitions/".concat(_.upperFirst(definition));
   }
 
   private initData(): void {

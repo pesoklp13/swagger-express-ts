@@ -8,11 +8,27 @@ export interface IApiOperationArgsBaseParameter {
   model?: string;
 }
 
+export enum DataType {
+  integer,
+  long,
+  float,
+  double,
+  string,
+  byte,
+  binary,
+  boolean,
+  date,
+  dateTime,
+  password,
+  object,
+  array,
+  file
+}
+
 export interface IApiOperationArgsBaseResponse {
   description?: string;
-  type?: string;
-  model?: string;
-  format?: string;
+  type?: DataType;
+  model?: string | DataType;
 }
 
 export interface IApiOperationArgsBaseParameters {
@@ -54,7 +70,7 @@ export interface IApiOperationArgsBase {
   tags?: string[];
 
   /**
-   * Define arguments
+   * Define path
    * Optional.
    */
   path?: string;

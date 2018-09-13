@@ -10,6 +10,7 @@ import { IApiOperationPatchArgs } from "./api-operation-patch.decorator";
 import { IApiOperationDeleteArgs } from "./api-operation-delete.decorator";
 import { SwaggerDefinitionConstant } from "./swagger-definition.constant";
 import { ISwaggerBuildDefinitionModel } from "./swagger.builder";
+import { DataType } from "./i-api-operation-args.base";
 import { VersionsController } from "../../version/versions.controller";
 
 const expect = chai.expect;
@@ -52,12 +53,11 @@ describe("SwaggerService", () => {
   describe("setInfo", () => {
     let info: ISwaggerInfo;
 
-    beforeEach(() => {
+    beforeEach( () => {
       info = {
         title: "Title",
         version: "1.0.1"
-      };
-    });
+      };});
 
     it("expect default info", () => {
       expect(SwaggerService.getInstance().getData().info.title).to.equal(
@@ -68,8 +68,7 @@ describe("SwaggerService", () => {
       );
     });
 
-    it("expect info when it defined", () => {
-      SwaggerService.getInstance().setInfo(info);
+    it("expect info when it defined", () => {  SwaggerService.getInstance().setInfo(info);
 
       expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
     });
@@ -123,7 +122,7 @@ describe("SwaggerService", () => {
     });
 
     it("should not fail when license with no url set", () => {
-      info.license = {
+        info.license = {
         name: "license"
       };
 
@@ -132,7 +131,7 @@ describe("SwaggerService", () => {
     });
 
     it("should fail when license with invalid url set", () => {
-      info.license = {
+        info.license = {
         name: "license",
         url: "localhost"
       };
@@ -180,8 +179,7 @@ describe("SwaggerService", () => {
         externalDocs.url
       );
     });
-
-    it("expect fail when invalid externalDocs value set", () => {
+it("expect fail when invalid externalDocs value set", () => {
       const externalDocs: ISwaggerExternalDocs = {
         url: "localhost"
       };
@@ -246,8 +244,7 @@ describe("SwaggerService", () => {
 
       expect(SwaggerService.getInstance().getData().host).to.equal(host);
     });
-
-    it("should fail when set bad host", () => {
+it("should fail when set bad host", () => {
       expect(() => {
         SwaggerService.getInstance().setHost("http://host");
       }).to.throw("host has to be valid HOST");
@@ -286,1902 +283,1845 @@ describe("SwaggerService", () => {
     });
   });
 
-  describe("setResponses", () => {
-    it("should set responses", () => {
-      const expected = {
-        NotFound: {
-          description: "Not Found",
-          schema: {
-            type: "string"
-          }
-        }
-      };
-
-      SwaggerService.getInstance().setGlobalResponses({
-        NotFound: {
-          description: "Not Found",
-          type: SwaggerDefinitionConstant.Response.Type.STRING
-        }
-      });
-
-      SwaggerService.getInstance().buildSwagger();
-
-      expect(SwaggerService.getInstance().getData().responses).to.deep.equal(
-        expected
-      );
-    });
-
-    it("should fail when empty response set", () => {
-      expect(() => {
-        SwaggerService.getInstance().setGlobalResponses({});
-      }).to.throw("Cannot be empty");
-    });
-  });
-
-  describe("addPath", () => {
-    it("expect new arguments", () => {
-      const args: IApiPathArgs = {
-        path: "/versions",
-        name: "version"
-      };
-      const target: any = {
-        name: "MyName"
-      };
-
-      SwaggerService.getInstance().addPath(args, target);
-
-      SwaggerService.getInstance().buildSwagger();
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal({
-        "/versions": {}
-      });
-    });
-  });
-
-  describe("addOperationGet", () => {
-    const pathArgs: IApiPathArgs = {
-      path: "/versions",
-      name: "Version"
-    };
-    const pathTarget: any = {
-      name: "VersionsController"
-    };
-    const operationGetTarget: any = {
-      constructor: {
-        name: "VersionsController"
-      }
-    };
-    let propertyKey: string | symbol;
-    let expectedPaths: { [key: string]: ISwaggerPath };
-
-    beforeEach(() => {
-      SwaggerService.getInstance().addPath(pathArgs, pathTarget);
-    });
-
-    describe("expect string", () => {
-      beforeEach(() => {
-        propertyKey = "getVersions";
-        expectedPaths = {
-          "/versions": {
-            get: {
-              consumes: [SwaggerDefinitionConstant.Consume.JSON],
-              operationId: "getVersions",
-              produces: [SwaggerDefinitionConstant.Produce.JSON],
-              responses: {
-                200: {
-                  description: "Success",
-                  schema: {
-                    type: SwaggerDefinitionConstant.Response.Type.STRING
-                  }
+    describe("setResponses", () => {
+        it("should set responses", () => {
+            const expected = {
+                NotFound: {
+                    description: "Not Found",
+                    schema: {
+                        type: "string"
+                    }
                 }
-              },
-              tags: ["Version"]
-            }
-          }
-        };
-      });
+            };
 
-      it("expect default", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect description", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          description: "get versions",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.description =
-          operationGetArgs.description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect summary", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          summary: "get versions",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.summary = operationGetArgs.summary;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect tags", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          },
-          tags: ["test-tag", "super-tag"]
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.tags = operationGetArgs.tags;
-        expectedPaths["/versions"].get.tags.unshift("Version");
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect consumes", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          consumes: [
-            SwaggerDefinitionConstant.Consume.JSON,
-            SwaggerDefinitionConstant.Consume.XML
-          ],
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect produces", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          produces: [
-            SwaggerDefinitionConstant.Produce.JSON,
-            SwaggerDefinitionConstant.Produce.XML
-          ],
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.produces = operationGetArgs.produces;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect responses", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              description: "return simple string",
-              type: SwaggerDefinitionConstant.Response.Type.STRING
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.responses[200].description =
-          operationGetArgs.responses[200].description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-    });
-
-    describe("expect number with float format", () => {
-      beforeEach(() => {
-        propertyKey = "getVersions";
-        expectedPaths = {
-          "/versions": {
-            get: {
-              consumes: [SwaggerDefinitionConstant.Consume.JSON],
-              operationId: "getVersions",
-              produces: [SwaggerDefinitionConstant.Produce.JSON],
-              responses: {
-                200: {
-                  description: "Success",
-                  schema: {
-                    type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-                    format: SwaggerDefinitionConstant.Response.Format.FLOAT
-                  }
+            SwaggerService.getInstance().setGlobalResponses({
+                NotFound: {
+                    description: "Not Found",
+                    type: DataType.string
                 }
-              },
-              tags: ["Version"]
-            }
-          }
+            });
+
+            SwaggerService.getInstance().buildSwagger();
+
+            expect(SwaggerService.getInstance().getData().responses).to.deep.equal(
+                expected
+            );
+        });
+
+        it("should fail when empty response set", () => {
+            expect(() => {
+                SwaggerService.getInstance().setGlobalResponses({});
+            }).to.throw("Cannot be empty");
+        });
+    });
+
+    describe("addPath", () => {
+        const pathArgs: IApiPathArgs = {
+            path: "/versions",
+            name: "Version"
         };
-      });
-
-      it("expect default", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          }
+        const pathTarget: any = {
+            name: "VersionsController"
         };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect description", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          description: "get versions",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
+        const operationTarget: any = {
+            constructor: {
+                name: "VersionsController"
             }
-          }
         };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+        it("expect new path", () => {
+            SwaggerService.getInstance().addPath(pathArgs, pathTarget);
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.description =
-          operationGetArgs.description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+            SwaggerService.getInstance().buildSwagger();
+            expect(SwaggerService.getInstance().getData().paths).to.deep.equal({
+                "/versions": {}
+            });
+        });
 
-      it("expect summary", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          summary: "get versions",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          }
-        };
+        describe("addOperationGet", () => {
+            let propertyKey: string | symbol;
+            let expectedPaths: { [key: string]: ISwaggerPath };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+            beforeEach(() => {
+                SwaggerService.getInstance().addPath(pathArgs, pathTarget);
+            });
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.summary = operationGetArgs.summary;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+            describe("expect string", () => {
+                beforeEach(() => {
+                    propertyKey = "getVersions";
+                    expectedPaths = {
+                        "/versions": {
+                            get: {
+                                consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                                operationId: "getVersions",
+                                produces: [SwaggerDefinitionConstant.Produce.JSON],
+                                responses: {
+                                    200: {
+                                        description: "Success",
+                                        schema: {
+                                            type: SwaggerDefinitionConstant.Response.Type.STRING
+                                        }
+                                    }
+                                },
+                                tags: ["Version"]
+                            }
+                        }
+                    };
+                });
 
-      it("expect tags", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          },
-          tags: ["test-tag", "super-tag"]
-        };
+                it("expect default", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        }
+                    };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.tags = operationGetArgs.tags;
-        expectedPaths["/versions"].get.tags.unshift("Version");
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+                    SwaggerService.getInstance().buildSwagger();
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
 
-      it("expect consumes", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          consumes: [
-            SwaggerDefinitionConstant.Consume.JSON,
-            SwaggerDefinitionConstant.Consume.XML
-          ],
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          }
-        };
+                it("expect description", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        description: "get versions",
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        }
+                    };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.description =
+                        operationGetArgs.description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
 
-      it("expect produces", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          produces: [
-            SwaggerDefinitionConstant.Produce.JSON,
-            SwaggerDefinitionConstant.Produce.XML
-          ],
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          }
-        };
+                it("expect summary", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        summary: "get versions",
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        }
+                    };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.produces = operationGetArgs.produces;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.summary = operationGetArgs.summary;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
 
-      it("expect responses", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              description: "return simple string",
-              type: SwaggerDefinitionConstant.Response.Type.NUMBER,
-              format: SwaggerDefinitionConstant.Response.Format.FLOAT
-            }
-          }
-        };
+                it("expect tags", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        },
+                        tags: ["test-tag", "super-tag"]
+                    };
 
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
 
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.responses[200].description =
-          operationGetArgs.responses[200].description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.tags = operationGetArgs.tags;
+                    expectedPaths["/versions"].get.tags.unshift("Version");
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect consumes", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        consumes: [
+                            SwaggerDefinitionConstant.Consume.JSON,
+                            SwaggerDefinitionConstant.Consume.XML
+                        ],
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect produces", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        produces: [
+                            SwaggerDefinitionConstant.Produce.JSON,
+                            SwaggerDefinitionConstant.Produce.XML
+                        ],
+                        responses: {
+                            200: {
+                                type: DataType.string
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.produces = operationGetArgs.produces;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect responses", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                description: "return simple string",
+                                type: DataType.string
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.responses[200].description =
+                        operationGetArgs.responses[200].description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+            });
+
+            describe("expect number with float format", () => {
+                beforeEach(() => {
+                    propertyKey = "getVersions";
+                    expectedPaths = {
+                        "/versions": {
+                            get: {
+                                consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                                operationId: "getVersions",
+                                produces: [SwaggerDefinitionConstant.Produce.JSON],
+                                responses: {
+                                    200: {
+                                        description: "Success",
+                                        schema: {
+                                            type: SwaggerDefinitionConstant.Response.Type.NUMBER,
+                                            format: SwaggerDefinitionConstant.Response.Format.FLOAT
+                                        }
+                                    }
+                                },
+                                tags: ["Version"]
+                            }
+                        }
+                    };
+                });
+
+                it("expect default", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect description", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        description: "get versions",
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.description =
+                        operationGetArgs.description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect summary", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        summary: "get versions",
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.summary = operationGetArgs.summary;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect tags", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        },
+                        tags: ["test-tag", "super-tag"]
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.tags = operationGetArgs.tags;
+                    expectedPaths["/versions"].get.tags.unshift("Version");
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect consumes", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        consumes: [
+                            SwaggerDefinitionConstant.Consume.JSON,
+                            SwaggerDefinitionConstant.Consume.XML
+                        ],
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect produces", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        produces: [
+                            SwaggerDefinitionConstant.Produce.JSON,
+                            SwaggerDefinitionConstant.Produce.XML
+                        ],
+                        responses: {
+                            200: {
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.produces = operationGetArgs.produces;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect responses", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                description: "return simple string",
+                                type: DataType.float
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.responses[200].description =
+                        operationGetArgs.responses[200].description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+            });
+
+            describe("expect array", () => {
+                beforeEach(() => {
+                    propertyKey = "getVersions";
+                    expectedPaths = {
+                        "/versions": {
+                            get: {
+                                consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                                operationId: "getVersions",
+                                produces: [SwaggerDefinitionConstant.Produce.JSON],
+                                responses: {
+                                    200: {
+                                        description: "Success",
+                                        schema: {
+                                            items: { $ref: "#/definitions/Version" },
+                                            type: SwaggerDefinitionConstant.Response.Type.ARRAY
+                                        }
+                                    }
+                                },
+                                tags: ["Version"]
+                            }
+                        }
+                    };
+                });
+
+                it("expect default", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect description", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        description: "get versions",
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.description =
+                        operationGetArgs.description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect summary", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        summary: "get versions",
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.summary = operationGetArgs.summary;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect tags", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        },
+                        tags: ["test-tag", "super-tag"]
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.tags = operationGetArgs.tags;
+                    expectedPaths["/versions"].get.tags.unshift("Version");
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect consumes", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        consumes: [
+                            SwaggerDefinitionConstant.Consume.JSON,
+                            SwaggerDefinitionConstant.Consume.XML
+                        ],
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect produces", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        produces: [
+                            SwaggerDefinitionConstant.Produce.JSON,
+                            SwaggerDefinitionConstant.Produce.XML
+                        ],
+                        responses: {
+                            200: {
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.produces = operationGetArgs.produces;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect responses", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        responses: {
+                            200: {
+                                description: "return version object",
+                                model: "Version",
+                                type: DataType.array
+                            }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions"].get.responses[200].description =
+                        operationGetArgs.responses[200].description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+            });
+
+            describe("expect object", () => {
+                beforeEach(() => {
+                    propertyKey = "getVersion";
+                    expectedPaths = {
+                        "/versions/{id}": {
+                            get: {
+                                consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                                operationId: "getVersion",
+                                produces: [SwaggerDefinitionConstant.Produce.JSON],
+                                responses: {
+                                    200: {
+                                        description: "Success",
+                                        schema: {
+                                            $ref: "#/definitions/Version"
+                                        }
+                                    }
+                                },
+                                tags: ["Version"]
+                            }
+                        }
+                    };
+                });
+
+                it("expect default", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        responses: {
+                            200: { model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect description", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        description: "get version",
+                        responses: {
+                            200: { model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.description =
+                        operationGetArgs.description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect summary", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        summary: "get version",
+                        responses: {
+                            200: { model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.summary =
+                        operationGetArgs.summary;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect tags", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        responses: {
+                            200: { model: "Version" }
+                        },
+                        tags: ["test-tag", "super-tag"]
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.tags = operationGetArgs.tags;
+                    expectedPaths["/versions/{id}"].get.tags.unshift("Version");
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect consumes", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        consumes: [
+                            SwaggerDefinitionConstant.Consume.JSON,
+                            SwaggerDefinitionConstant.Consume.XML
+                        ],
+                        responses: {
+                            200: { model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.consumes =
+                        operationGetArgs.consumes;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect produces", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        produces: [
+                            SwaggerDefinitionConstant.Produce.JSON,
+                            SwaggerDefinitionConstant.Produce.XML
+                        ],
+                        responses: {
+                            200: { model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.produces =
+                        operationGetArgs.produces;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+
+                it("expect responses", () => {
+                    const operationGetArgs: IApiOperationGetArgs = {
+                        path: "/{id}",
+                        responses: {
+                            200: { description: "return version object", model: "Version" }
+                        }
+                    };
+
+                    SwaggerService.getInstance().addOperationGet(
+                        operationGetArgs,
+                        operationTarget,
+                        propertyKey
+                    );
+
+                    SwaggerService.getInstance().buildSwagger();
+                    expectedPaths["/versions/{id}"].get.responses[200].description =
+                        operationGetArgs.responses[200].description;
+                    expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                        expectedPaths
+                    );
+                });
+            });
+        });
+
+        describe("addOperationPost", () => {
+            const propertyKey: string | symbol = "postVersion";
+            let expectedPaths: { [key: string]: ISwaggerPath };
+
+            beforeEach(() => {
+                SwaggerService.getInstance().addPath(pathArgs, pathTarget);
+                expectedPaths = {
+                    "/versions": {
+                        post: {
+                            parameters: [
+                                {
+                                    in: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    name: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    required: true,
+                                    schema: {
+                                        $ref: "#/definitions/Version"
+                                    }
+                                }
+                            ],
+                            consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                            operationId: propertyKey,
+                            produces: [SwaggerDefinitionConstant.Produce.JSON],
+                            responses: {
+                                200: {
+                                    description: "Success",
+                                    schema: {
+                                        items: {
+                                            $ref: "#/definitions/Version"
+                                        },
+                                        type: SwaggerDefinitionConstant.Response.Type.ARRAY
+                                    }
+                                }
+                            },
+                            tags: ["Version"]
+                        }
+                    }
+                };
+            });
+
+            it("expect default", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect description", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    description: "post version",
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions"].post.description =
+                    argsOperationPost.description;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect summary", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    summary: "post version",
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions"].post.summary = argsOperationPost.summary;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect tags", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    },
+                    tags: ["test-tag", "super-tag"]
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions"].post.tags = argsOperationPost.tags;
+                expectedPaths["/versions"].post.tags.unshift("Version");
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect consumes", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    consumes: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions"].post.consumes = argsOperationPost.consumes;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect produces", () => {
+                const argsOperationPost: IApiOperationPostArgs = {
+                    produces: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version",
+                            type: DataType.array
+                        }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPost(
+                    argsOperationPost,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions"].post.produces = argsOperationPost.produces;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+        });
+
+        describe("addOperationPut", () => {
+            const propertyKey: string | symbol = "putVersion";
+            let expectedPaths: { [key: string]: ISwaggerPath };
+
+            beforeEach(() => {
+                SwaggerService.getInstance().addPath(pathArgs, pathTarget);
+                expectedPaths = {
+                    "/versions/{id}": {
+                        put: {
+                            parameters: [
+                                {
+                                    in: "path",
+                                    description: "Id of version",
+                                    name: "id",
+                                    required: true,
+                                    type: SwaggerDefinitionConstant.Parameter.Type.STRING
+                                },
+                                {
+                                    in: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    name: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    required: true,
+                                    schema: {
+                                        $ref: "#/definitions/Version"
+                                    }
+                                }
+                            ],
+                            consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                            operationId: propertyKey,
+                            produces: [SwaggerDefinitionConstant.Produce.JSON],
+                            responses: {
+                                200: {
+                                    description: "Success",
+                                    schema: {
+                                        $ref: "#/definitions/Version"
+                                    }
+                                }
+                            },
+                            tags: ["Version"]
+                        }
+                    }
+                };
+            });
+
+            it("expect default", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect description", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    description: "post version",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].put.description =
+                    argsOperationPut.description;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect summary", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    summary: "post version",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].put.summary = argsOperationPut.summary;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect tags", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    },
+                    tags: ["test-tag", "super-tag"]
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].put.tags = argsOperationPut.tags;
+                expectedPaths["/versions/{id}"].put.tags.unshift("Version");
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect consumes", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    consumes: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].put.consumes =
+                    argsOperationPut.consumes;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect produces", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}",
+                    produces: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPut(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].put.produces =
+                    argsOperationPut.produces;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+        });
+
+        describe("addOperationPatch", () => {
+            const propertyKey: string | symbol = "patchVersionDescription";
+            let expectedPaths: { [key: string]: ISwaggerPath };
+
+            beforeEach(() => {
+                SwaggerService.getInstance().addPath(pathArgs, pathTarget);
+                expectedPaths = {
+                    "/versions/{id}/description": {
+                        patch: {
+                            parameters: [
+                                {
+                                    in: "path",
+                                    description: "Id of version",
+                                    name: "id",
+                                    required: true,
+                                    type: SwaggerDefinitionConstant.Parameter.Type.STRING
+                                },
+                                {
+                                    in: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    name: SwaggerDefinitionConstant.Parameter.In.BODY,
+                                    required: true,
+                                    schema: {
+                                        $ref: "#/definitions/Version"
+                                    }
+                                }
+                            ],
+                            consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                            operationId: propertyKey,
+                            produces: [SwaggerDefinitionConstant.Produce.JSON],
+                            responses: {
+                                200: {
+                                    description: "Success",
+                                    schema: {
+                                        $ref: "#/definitions/Version"
+                                    }
+                                }
+                            },
+                            tags: ["Version"]
+                        }
+                    }
+                };
+            });
+
+            it("expect default", () => {
+                const argsOperationPatch: IApiOperationPatchArgs = {
+                    path: "/{id}/description",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPatch,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect description", () => {
+                const argsOperationPatch: IApiOperationPutArgs = {
+                    path: "/{id}/description",
+                    description: "patch version description",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPatch,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}/description"].patch.description =
+                    argsOperationPatch.description;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect summary", () => {
+                const argsOperationPatch: IApiOperationPatchArgs = {
+                    path: "/{id}/description",
+                    summary: "patch version description",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPatch,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}/description"].patch.summary =
+                    argsOperationPatch.summary;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect tags", () => {
+                const argsOperationPatch: IApiOperationPatchArgs = {
+                    path: "/{id}/description",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    },
+                    tags: ["test-tag", "super-tag"]
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPatch,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}/description"].patch.tags =
+                    argsOperationPatch.tags;
+                expectedPaths["/versions/{id}/description"].patch.tags.unshift(
+                    "Version"
+                );
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect consumes", () => {
+                const argsOperationPatch: IApiOperationPatchArgs = {
+                    path: "/{id}/description",
+                    consumes: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPatch,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}/description"].patch.consumes =
+                    argsOperationPatch.consumes;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect produces", () => {
+                const argsOperationPut: IApiOperationPutArgs = {
+                    path: "/{id}/description",
+                    produces: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        },
+                        body: {
+                            description: "New versions",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: { model: "Version" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationPatch(
+                    argsOperationPut,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}/description"].patch.produces =
+                    argsOperationPut.produces;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+        });
+
+        describe("addOperationDelete", () => {
+            const propertyKey: string | symbol = "deleteVersion";
+            let expectedPaths: { [key: string]: ISwaggerPath };
+
+            beforeEach(() => {
+                SwaggerService.getInstance().addPath(pathArgs, pathTarget);
+                expectedPaths = {
+                    "/versions/{id}": {
+                        delete: {
+                            consumes: [SwaggerDefinitionConstant.Consume.JSON],
+                            operationId: propertyKey,
+                            parameters: [
+                                {
+                                    in: "path",
+                                    description: "Id of version",
+                                    name: "id",
+                                    required: true,
+                                    type: SwaggerDefinitionConstant.Parameter.Type.STRING
+                                }
+                            ],
+                            produces: [SwaggerDefinitionConstant.Produce.JSON],
+                            responses: {
+                                200: {
+                                    description: "Success"
+                                }
+                            },
+                            tags: ["Version"]
+                        }
+                    }
+                };
+            });
+
+            it("expect default", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect description", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    description: "delete version",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].delete.description =
+                    argsOperationDelete.description;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect summary", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    summary: "delete version",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].delete.summary =
+                    argsOperationDelete.summary;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect tags", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    },
+                    tags: ["test-tag", "super-tag"]
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].delete.tags = argsOperationDelete.tags;
+                expectedPaths["/versions/{id}"].delete.tags.unshift("Version");
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect consumes", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    consumes: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].delete.consumes =
+                    argsOperationDelete.consumes;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+
+            it("expect produces", () => {
+                const argsOperationDelete: IApiOperationDeleteArgs = {
+                    path: "/{id}",
+                    produces: [
+                        SwaggerDefinitionConstant.Consume.JSON,
+                        SwaggerDefinitionConstant.Consume.XML
+                    ],
+                    parameters: {
+                        path: {
+                            id: {
+                                description: "Id of version",
+                                type: SwaggerDefinitionConstant.Parameter.Type.STRING,
+                                required: true
+                            }
+                        }
+                    },
+                    responses: {
+                        200: { description: "Success" }
+                    }
+                };
+
+                SwaggerService.getInstance().addOperationDelete(
+                    argsOperationDelete,
+                    operationTarget,
+                    propertyKey
+                );
+
+                SwaggerService.getInstance().buildSwagger();
+                expectedPaths["/versions/{id}"].delete.produces =
+                    argsOperationDelete.produces;
+                expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
+                    expectedPaths
+                );
+            });
+        });
     });
 
-    describe("expect array", () => {
-      beforeEach(() => {
-        propertyKey = "getVersions";
-        expectedPaths = {
-          "/versions": {
-            get: {
-              consumes: [SwaggerDefinitionConstant.Consume.JSON],
-              operationId: "getVersions",
-              produces: [SwaggerDefinitionConstant.Produce.JSON],
-              responses: {
-                200: {
-                  description: "Success",
-                  schema: {
-                    items: { $ref: "#/definitions/Version" },
-                    type: SwaggerDefinitionConstant.Response.Type.ARRAY
-                  }
-                }
-              },
-              tags: ["Version"]
-            }
-          }
-        };
-      });
-
-      it("expect default", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect description", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          description: "get versions",
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.description =
-          operationGetArgs.description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect summary", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          summary: "get versions",
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.summary = operationGetArgs.summary;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect tags", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          },
-          tags: ["test-tag", "super-tag"]
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.tags = operationGetArgs.tags;
-        expectedPaths["/versions"].get.tags.unshift("Version");
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect consumes", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          consumes: [
-            SwaggerDefinitionConstant.Consume.JSON,
-            SwaggerDefinitionConstant.Consume.XML
-          ],
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.consumes = operationGetArgs.consumes;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect produces", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          produces: [
-            SwaggerDefinitionConstant.Produce.JSON,
-            SwaggerDefinitionConstant.Produce.XML
-          ],
-          responses: {
-            200: {
-              model: "Version",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.produces = operationGetArgs.produces;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect responses", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          responses: {
-            200: {
-              description: "return version object",
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-              model: "Version"
-            }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions"].get.responses[200].description =
-          operationGetArgs.responses[200].description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-    });
-
-    describe("expect object", () => {
-      beforeEach(() => {
-        propertyKey = "getVersion";
-        expectedPaths = {
-          "/versions/{id}": {
-            get: {
-              consumes: [SwaggerDefinitionConstant.Consume.JSON],
-              operationId: "getVersion",
-              produces: [SwaggerDefinitionConstant.Produce.JSON],
-              responses: {
-                200: {
-                  description: "Success",
-                  schema: {
-                    $ref: "#/definitions/Version"
-                  }
-                }
-              },
-              tags: ["Version"]
-            }
-          }
-        };
-      });
-
-      it("expect default", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          responses: {
-            200: { model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect description", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          description: "get version",
-          responses: {
-            200: { model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.description =
-          operationGetArgs.description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect summary", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          summary: "get version",
-          responses: {
-            200: { model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.summary = operationGetArgs.summary;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect tags", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          responses: {
-            200: { model: "Version" }
-          },
-          tags: ["test-tag", "super-tag"]
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.tags = operationGetArgs.tags;
-        expectedPaths["/versions/{id}"].get.tags.unshift("Version");
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect consumes", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          consumes: [
-            SwaggerDefinitionConstant.Consume.JSON,
-            SwaggerDefinitionConstant.Consume.XML
-          ],
-          responses: {
-            200: { model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.consumes =
-          operationGetArgs.consumes;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect produces", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          produces: [
-            SwaggerDefinitionConstant.Produce.JSON,
-            SwaggerDefinitionConstant.Produce.XML
-          ],
-          responses: {
-            200: { model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.produces =
-          operationGetArgs.produces;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-
-      it("expect responses", () => {
-        const operationGetArgs: IApiOperationGetArgs = {
-          path: "/{id}",
-          responses: {
-            200: { description: "return version object", model: "Version" }
-          }
-        };
-
-        SwaggerService.getInstance().addOperationGet(
-          operationGetArgs,
-          operationGetTarget,
-          propertyKey
-        );
-
-        SwaggerService.getInstance().buildSwagger();
-        expectedPaths["/versions/{id}"].get.responses[200].description =
-          operationGetArgs.responses[200].description;
-        expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-          expectedPaths
-        );
-      });
-    });
-  });
-
-  describe("addOperationPost", () => {
-    const argsPath: IApiPathArgs = {
-      path: "/versions",
-      name: "Version"
-    };
-    const targetPath: any = {
-      name: "VersionController"
-    };
-    const targetOperationPost: any = {
-      constructor: {
-        name: "VersionController"
-      }
-    };
-    const propertyKey: string | symbol = "postVersion";
-    let expectedPaths: { [key: string]: ISwaggerPath };
-
-    beforeEach(() => {
-      SwaggerService.getInstance().addPath(argsPath, targetPath);
-      expectedPaths = {
-        "/versions": {
-          post: {
-            parameters: [
-              {
-                in: SwaggerDefinitionConstant.Parameter.In.BODY,
-                name: SwaggerDefinitionConstant.Parameter.In.BODY,
-                required: true,
-                schema: {
-                  $ref: "#/definitions/Version"
-                }
-              }
-            ],
-            consumes: [SwaggerDefinitionConstant.Consume.JSON],
-            operationId: propertyKey,
-            produces: [SwaggerDefinitionConstant.Produce.JSON],
-            responses: {
-              200: {
-                description: "Success",
-                schema: {
-                  items: {
-                    $ref: "#/definitions/Version"
-                  },
-                  type: SwaggerDefinitionConstant.Response.Type.ARRAY
-                }
-              }
-            },
-            tags: ["Version"]
-          }
-        }
-      };
-    });
-
-    it("expect default", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            model: "Version",
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY
-          }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect description", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        description: "post version",
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            model: "Version",
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY
-          }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions"].post.description =
-        argsOperationPost.description;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect summary", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        summary: "post version",
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            model: "Version",
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY
-          }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions"].post.summary = argsOperationPost.summary;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect tags", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            model: "Version",
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY
-          }
-        },
-        tags: ["test-tag", "super-tag"]
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions"].post.tags = argsOperationPost.tags;
-      expectedPaths["/versions"].post.tags.unshift("Version");
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect consumes", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        consumes: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-            model: "Version"
-          }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions"].post.consumes = argsOperationPost.consumes;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect produces", () => {
-      const argsOperationPost: IApiOperationPostArgs = {
-        produces: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: {
-            type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-            model: "Version"
-          }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPost(
-        argsOperationPost,
-        targetOperationPost,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions"].post.produces = argsOperationPost.produces;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-  });
-
-  describe("addOperationPut", () => {
-    const argsPath: IApiPathArgs = {
-      path: "/versions",
-      name: "Version"
-    };
-    const targetPath: any = {
-      name: "VersionController"
-    };
-    const targetOperationPut: any = {
-      constructor: {
-        name: "VersionController"
-      }
-    };
-    const propertyKey: string | symbol = "putVersion";
-    let expectedPaths: { [key: string]: ISwaggerPath };
-
-    beforeEach(() => {
-      SwaggerService.getInstance().addPath(argsPath, targetPath);
-      expectedPaths = {
-        "/versions/{id}": {
-          put: {
-            parameters: [
-              {
-                in: "path",
-                description: "Id of version",
-                name: "id",
-                required: true,
-                type: SwaggerDefinitionConstant.Parameter.Type.STRING
-              },
-              {
-                in: SwaggerDefinitionConstant.Parameter.In.BODY,
-                name: SwaggerDefinitionConstant.Parameter.In.BODY,
-                required: true,
-                schema: {
-                  $ref: "#/definitions/Version"
-                }
-              }
-            ],
-            consumes: [SwaggerDefinitionConstant.Consume.JSON],
-            operationId: propertyKey,
-            produces: [SwaggerDefinitionConstant.Produce.JSON],
-            responses: {
-              200: {
-                description: "Success",
-                schema: {
-                  $ref: "#/definitions/Version"
-                }
-              }
-            },
-            tags: ["Version"]
-          }
-        }
-      };
-    });
-
-    it("expect default", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect description", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        description: "post version",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].put.description =
-        argsOperationPut.description;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect summary", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        summary: "post version",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].put.summary = argsOperationPut.summary;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect tags", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        },
-        tags: ["test-tag", "super-tag"]
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].put.tags = argsOperationPut.tags;
-      expectedPaths["/versions/{id}"].put.tags.unshift("Version");
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect consumes", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        consumes: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].put.consumes = argsOperationPut.consumes;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect produces", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}",
-        produces: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPut(
-        argsOperationPut,
-        targetOperationPut,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].put.produces = argsOperationPut.produces;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-  });
-
-  describe("addOperationPatch", () => {
-    const argsPath: IApiPathArgs = {
-      path: "/versions",
-      name: "Version"
-    };
-    const targetPath: any = {
-      name: "VersionController"
-    };
-    const targetOperationPatch: any = {
-      constructor: {
-        name: "VersionController"
-      }
-    };
-    const propertyKey: string | symbol = "patchVersionDescription";
-    let expectedPaths: { [key: string]: ISwaggerPath };
-
-    beforeEach(() => {
-      SwaggerService.getInstance().addPath(argsPath, targetPath);
-      expectedPaths = {
-        "/versions/{id}/description": {
-          patch: {
-            parameters: [
-              {
-                in: "path",
-                description: "Id of version",
-                name: "id",
-                required: true,
-                type: SwaggerDefinitionConstant.Parameter.Type.STRING
-              },
-              {
-                in: SwaggerDefinitionConstant.Parameter.In.BODY,
-                name: SwaggerDefinitionConstant.Parameter.In.BODY,
-                required: true,
-                schema: {
-                  $ref: "#/definitions/Version"
-                }
-              }
-            ],
-            consumes: [SwaggerDefinitionConstant.Consume.JSON],
-            operationId: propertyKey,
-            produces: [SwaggerDefinitionConstant.Produce.JSON],
-            responses: {
-              200: {
-                description: "Success",
-                schema: {
-                  $ref: "#/definitions/Version"
-                }
-              }
-            },
-            tags: ["Version"]
-          }
-        }
-      };
-    });
-
-    it("expect default", () => {
-      const argsOperationPatch: IApiOperationPatchArgs = {
-        path: "/{id}/description",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPatch,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect description", () => {
-      const argsOperationPatch: IApiOperationPutArgs = {
-        path: "/{id}/description",
-        description: "patch version description",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPatch,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}/description"].patch.description =
-        argsOperationPatch.description;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect summary", () => {
-      const argsOperationPatch: IApiOperationPatchArgs = {
-        path: "/{id}/description",
-        summary: "patch version description",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPatch,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}/description"].patch.summary =
-        argsOperationPatch.summary;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect tags", () => {
-      const argsOperationPatch: IApiOperationPatchArgs = {
-        path: "/{id}/description",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        },
-        tags: ["test-tag", "super-tag"]
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPatch,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}/description"].patch.tags =
-        argsOperationPatch.tags;
-      expectedPaths["/versions/{id}/description"].patch.tags.unshift("Version");
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect consumes", () => {
-      const argsOperationPatch: IApiOperationPatchArgs = {
-        path: "/{id}/description",
-        consumes: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPatch,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}/description"].patch.consumes =
-        argsOperationPatch.consumes;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect produces", () => {
-      const argsOperationPut: IApiOperationPutArgs = {
-        path: "/{id}/description",
-        produces: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          },
-          body: {
-            description: "New versions",
-            required: true,
-            model: "Version"
-          }
-        },
-        responses: {
-          200: { model: "Version" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationPatch(
-        argsOperationPut,
-        targetOperationPatch,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}/description"].patch.produces =
-        argsOperationPut.produces;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-  });
-
-  describe("addOperationDelete", () => {
-    const argsPath: IApiPathArgs = {
-      path: "/versions",
-      name: "Version"
-    };
-    const targetPath: any = {
-      name: "VersionController"
-    };
-    const targetOperationDelete: any = {
-      constructor: {
-        name: "VersionController"
-      }
-    };
-    const propertyKey: string | symbol = "deleteVersion";
-    let expectedPaths: { [key: string]: ISwaggerPath };
-
-    beforeEach(() => {
-      SwaggerService.getInstance().addPath(argsPath, targetPath);
-      expectedPaths = {
-        "/versions/{id}": {
-          delete: {
-            consumes: [SwaggerDefinitionConstant.Consume.JSON],
-            operationId: propertyKey,
-            parameters: [
-              {
-                in: "path",
-                description: "Id of version",
-                name: "id",
-                required: true,
-                type: SwaggerDefinitionConstant.Parameter.Type.STRING
-              }
-            ],
-            produces: [SwaggerDefinitionConstant.Produce.JSON],
-            responses: {
-              200: {
-                description: "Success"
-              }
-            },
-            tags: ["Version"]
-          }
-        }
-      };
-    });
-
-    it("expect default", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect description", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        description: "delete version",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].delete.description =
-        argsOperationDelete.description;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect summary", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        summary: "delete version",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].delete.summary =
-        argsOperationDelete.summary;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect tags", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        },
-        tags: ["test-tag", "super-tag"]
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].delete.tags = argsOperationDelete.tags;
-      expectedPaths["/versions/{id}"].delete.tags.unshift("Version");
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect consumes", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        consumes: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].delete.consumes =
-        argsOperationDelete.consumes;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-
-    it("expect produces", () => {
-      const argsOperationDelete: IApiOperationDeleteArgs = {
-        path: "/{id}",
-        produces: [
-          SwaggerDefinitionConstant.Consume.JSON,
-          SwaggerDefinitionConstant.Consume.XML
-        ],
-        parameters: {
-          path: {
-            id: {
-              description: "Id of version",
-              type: SwaggerDefinitionConstant.Parameter.Type.STRING,
-              required: true
-            }
-          }
-        },
-        responses: {
-          200: { description: "Success" }
-        }
-      };
-
-      SwaggerService.getInstance().addOperationDelete(
-        argsOperationDelete,
-        targetOperationDelete,
-        propertyKey
-      );
-
-      SwaggerService.getInstance().buildSwagger();
-      expectedPaths["/versions/{id}"].delete.produces =
-        argsOperationDelete.produces;
-      expect(SwaggerService.getInstance().getData().paths).to.deep.equal(
-        expectedPaths
-      );
-    });
-  });
-
-  describe("tags", () => {
-    // TODO to be refactored in version 2.0.0
+    describe("tags", () => {
+        // TODO to be refactored in version 2.0.0
 
     const target: any = {
       name: "VersionsController",
@@ -2190,116 +2130,116 @@ describe("SwaggerService", () => {
       }
     };
 
-    it("should be declared two tags", () => {
-      SwaggerService.getInstance().addPath(
-        {
-          path: "/versions",
-          name: "Versions"
-        },
-        target
-      );
+        it("should be declared two tags", () => {
+            SwaggerService.getInstance().addPath(
+                {
+                    path: "/versions",
+                    name: "Versions"
+                },
+                target
+            );
 
-      SwaggerService.getInstance().addOperationGet(
-        {
-          description: "Get versions objects list",
-          summary: "Get versions list",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-              model: "Version"
-            }
-          }
-        },
-        target,
-        "getVersions"
-      );
+            SwaggerService.getInstance().addOperationGet(
+                {
+                    description: "Get versions objects list",
+                    summary: "Get versions list",
+                    responses: {
+                        200: {
+                            type: DataType.array,
+                            model: "Version"
+                        }
+                    }
+                },
+                target,
+                "getVersions"
+            );
 
-      SwaggerService.getInstance().addOperationPost(
-        {
-          description: "Post version object",
-          summary: "Post new version",
-          parameters: {
-            body: {
-              description: "New version",
-              required: true,
-              model: "Version"
-            }
-          },
-          responses: {
-            200: {
-              model: "Version"
-            },
-            400: { description: "Parameters fail" }
-          },
-          tags: ["Authors"]
-        },
-        target,
-        "saveVersion"
-      );
+            SwaggerService.getInstance().addOperationPost(
+                {
+                    description: "Post version object",
+                    summary: "Post new version",
+                    parameters: {
+                        body: {
+                            description: "New version",
+                            required: true,
+                            model: "Version"
+                        }
+                    },
+                    responses: {
+                        200: {
+                            model: "Version"
+                        },
+                        400: { description: "Parameters fail" }
+                    },
+                    tags: ["Authors"]
+                },
+                target,
+                "saveVersion"
+            );
 
-      SwaggerService.getInstance().buildSwagger();
+            SwaggerService.getInstance().buildSwagger();
 
-      expect(SwaggerService.getInstance().getData().tags).to.deep.equal([
-        { name: "Authors" },
-        { name: "Versions" }
-      ]);
-    });
+            expect(SwaggerService.getInstance().getData().tags).to.deep.equal([
+                { name: "Authors" },
+                { name: "Versions" }
+            ]);
+        });
 
-    it("should be declared one distinct tag", () => {
-      SwaggerService.getInstance().addPath(
-        {
-          path: "/versions",
-          name: "Versions"
-        },
-        target
-      );
+        it("should be declared one distinct tag", () => {
+            SwaggerService.getInstance().addPath(
+                {
+                    path: "/versions",
+                    name: "Versions"
+                },
+                target
+            );
 
-      const newTarget = {
-        name: "VersionController",
-        constructor: {
-          name: "VersionController"
-        }
-      };
+            const newTarget = {
+                name: "VersionController",
+                constructor: {
+                    name: "VersionController"
+                }
+            };
 
-      SwaggerService.getInstance().addPath(
-        {
-          path: "/versions/{id}",
-          name: "Versions"
-        },
-        newTarget
-      );
+            SwaggerService.getInstance().addPath(
+                {
+                    path: "/versions/{id}",
+                    name: "Versions"
+                },
+                newTarget
+            );
 
-      SwaggerService.getInstance().addOperationGet(
-        {
-          description: "Get versions objects list",
-          summary: "Get versions list",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-              model: "Version"
-            }
-          }
-        },
-        target,
-        "getVersions"
-      );
+            SwaggerService.getInstance().addOperationGet(
+                {
+                    description: "Get versions objects list",
+                    summary: "Get versions list",
+                    responses: {
+                        200: {
+                            type: DataType.array,
+                            model: "Version"
+                        }
+                    }
+                },
+                target,
+                "getVersions"
+            );
 
-      SwaggerService.getInstance().addOperationGet(
-        {
-          description: "Get versions objects list",
-          summary: "Get versions list",
-          responses: {
-            200: {
-              type: SwaggerDefinitionConstant.Response.Type.ARRAY,
-              model: "Version"
-            }
-          }
-        },
-        newTarget,
-        "getVersion"
-      );
+            SwaggerService.getInstance().addOperationGet(
+                {
+                    description: "Get versions objects list",
+                    summary: "Get versions list",
+                    responses: {
+                        200: {
+                            type: DataType.array,
+                            model: "Version"
+                        }
+                    }
+                },
+                newTarget,
+                "getVersion"
+            );
 
-      SwaggerService.getInstance().buildSwagger();
+            SwaggerService.getInstance().buildSwagger();
 
       expect(SwaggerService.getInstance().getData().tags).to.deep.equal([
         { name: "Versions" }

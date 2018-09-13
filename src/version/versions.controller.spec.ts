@@ -19,14 +19,13 @@ describe("VersionsController", () => {
     it("expect version list", () => {
       const request: express.Request = {} as any;
       const response: express.Response = {} as any;
-      const next: express.NextFunction = {} as any;
       const versionList: VersionModel[] = [];
       const versionsServiceGetVersionsStub = sinon.stub().returns(versionList);
       versionsService.getVersions = versionsServiceGetVersionsStub;
       const responseJsonSpy = sinon.spy();
       response.json = responseJsonSpy;
 
-      versionsController.getVersions(request, response, next);
+      versionsController.getVersions(request, response);
 
       expect(versionsServiceGetVersionsStub.called).is.true;
       expect(responseJsonSpy.calledWith(versionList)).is.true;
@@ -37,7 +36,6 @@ describe("VersionsController", () => {
     it("expect post version", () => {
       const request: express.Request = {} as any;
       const response: express.Response = {} as any;
-      const next: express.NextFunction = {} as any;
       const version: VersionModel = {} as any;
       const versionsServiceAddVersionStub = sinon.stub().returns(version);
       versionsService.addVersion = versionsServiceAddVersionStub;
@@ -45,7 +43,7 @@ describe("VersionsController", () => {
       response.json = responseJsonSpy;
       request.body = {};
 
-      versionsController.postVersion(request, response, next);
+      versionsController.postVersion(request, response);
 
       expect(versionsServiceAddVersionStub.calledWith(request.body)).is.true;
       expect(responseJsonSpy.calledWith(version)).is.true;

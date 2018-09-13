@@ -51,7 +51,11 @@ export interface ISwaggerOperationParameter {
 
 export interface ISwaggerOperationSchema {
   type?: string;
-  items?: { $ref: string };
+  items?: {
+    $ref?: string;
+    type?: string;
+    format?: string;
+  };
   $ref?: string;
   format?: string;
 }
@@ -61,7 +65,7 @@ export interface ISwaggerOperationSchemaItems {
 }
 
 export interface ISwaggerOperationResponse {
-  description?: string;
+  description: string;
   schema?: ISwaggerOperationSchema;
 }
 
