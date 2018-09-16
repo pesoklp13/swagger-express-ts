@@ -8,12 +8,15 @@ import {
 } from "../i-swagger";
 import { SwaggerDefinitionConstant } from "../swagger-definition.constant";
 import { ReferenceBuilder } from "./reference.builder";
+import { NotEmpty, Validate } from "../decorators/validate.decorator";
 
 export class ResponseBuilder {
   private responses: { [statusCode: string]: IApiOperationArgsBaseResponse };
   private refBuilder: ReferenceBuilder = new ReferenceBuilder();
 
-  public withResponses(responses: {
+  @Validate
+  public withResponses(@NotEmpty()
+  responses: {
     [statusCode: string]: IApiOperationArgsBaseResponse;
   }) {
     this.responses = responses;

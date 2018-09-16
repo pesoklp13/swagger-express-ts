@@ -1,10 +1,12 @@
 import {
   ISwagger,
-  ISwaggerContact,ISwaggerDefinition,
+  ISwaggerContact,
+  ISwaggerDefinition,
   ISwaggerDefinitionProperty,
   ISwaggerExternalDocs,
   ISwaggerInfo,
-  ISwaggerLicense,ISwaggerOperation,
+  ISwaggerLicense,
+  ISwaggerOperation,
   ISwaggerOperationParameter,
   ISwaggerPath,
   ISwaggerTag
@@ -129,7 +131,9 @@ export class SwaggerService {
 
   @Validate
   public setHost(
-    @Pattern({ pattern: PatternEnum.HOST, path: "host" })host: string): void {
+    @Pattern({ pattern: PatternEnum.HOST, path: "host" })
+    host: string
+  ): void {
     this.data.host = host;
   }
 
@@ -202,7 +206,9 @@ export class SwaggerService {
 
   @Validate
   public setExternalDocs(
-    @Pattern({ pattern: PatternEnum.URI, path: "url" })externalDocs: ISwaggerExternalDocs): void {
+    @Pattern({ pattern: PatternEnum.URI, path: "url" })
+    externalDocs: ISwaggerExternalDocs
+  ): void {
     this.data.externalDocs = externalDocs;
   }
 
@@ -354,20 +360,20 @@ export class SwaggerService {
         } else {
           data.paths[controller.path] = {};
         }
-        const tag: ISwaggerTag ={
+        const tag: ISwaggerTag = {
           name: controller.name
-          };
+        };
 
         if (controller.description) {
           tag.description = controller.description;
         }
 
-    this.addTag(data.tags, tag);
+        this.addTag(data.tags, tag);
       }
     }
 
     this.data = data;
-    this.data .tags = Array.from(this.data.tags);
+    this.data.tags = Array.from(this.data.tags);
   }
 
   public addApiModel(args: IApiModelArgs, target: any): any {
@@ -449,7 +455,8 @@ export class SwaggerService {
     license: ISwaggerLicense
   ) {
     this.data.info.license = license;
-  }private addOperation(
+  }
+  private addOperation(
     operation: OperationMethods,
     args: IApiOperationArgsBase,
     target: any,
@@ -499,7 +506,7 @@ export class SwaggerService {
 
     (currentPath as any)[operation] = this.buildOperation(args, propertyKey);
     this.controllerMap[target.constructor.name] = currentController;
-_.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
+    _.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
       this.addTag(this.data.tags, tag)
     );
   }
@@ -594,7 +601,7 @@ _.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
     if (args.responses) {
       operation.responses = this.responseBuilder
         .withResponses(args.responses)
-    .build();
+        .build();
     }
 
     if (args.security) {
@@ -672,7 +679,6 @@ _.map(args.tags, tag => ({ name: _.upperFirst(tag) })).forEach(tag =>
     if (_.isUndefined(operation.deprecated) && controller.deprecated) {
       operation.deprecated = controller.deprecated;
     }
-
 
     if (!operation.tags) {
       operation.tags = [];

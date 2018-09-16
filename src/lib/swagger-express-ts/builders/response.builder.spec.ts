@@ -9,6 +9,12 @@ const expect = chai.expect;
 describe("ResponseBuilder", () => {
   const responseBuilder = new ResponseBuilder();
 
+  it("should fail when empty responses set", () => {
+    expect(() => {
+      responseBuilder.withResponses({});
+    }).to.throw("Cannot be empty");
+  });
+
   describe("description", () => {
     it("should return empty object", () => {
       expect(responseBuilder.build()).to.be.deep.equal({});
