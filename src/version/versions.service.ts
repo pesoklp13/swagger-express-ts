@@ -13,7 +13,7 @@ export class VersionsService {
       description: "Description Version 1",
       author: {
         id: "1",
-        name: ["John DOE"]
+        name: ["John Doe"]
       }
     },
     {
@@ -22,7 +22,7 @@ export class VersionsService {
       description: "Description Version 2",
       author: {
         id: "1",
-        name: ["John DOE"]
+        name: ["John Doe"]
       }
     }
   ];

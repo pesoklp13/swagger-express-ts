@@ -11,12 +11,14 @@ import {
 export class AuthorModel {
   @ApiModelProperty({
     description: "Id of author",
+    example: 1,
     required: true
   })
-  public id: string;
+  public id: string | number;
 
   @ApiModelProperty({
     description: "Name of author",
+    example: "John Doe",
     required: true,
     itemType: SwaggerDefinitionConstant.Model.Property.Type.STRING
   })

@@ -102,6 +102,7 @@ export interface ISwaggerDefinitionProperty {
   format?: string; // Example : SwaggerDefinition.Definition.Property.Format.INT_64
   required?: boolean;
   description?: string;
+  example?: string | number;
   enum?: string[];
   items?: ISwaggerDefinitionPropertyItems;
   $ref?: string;

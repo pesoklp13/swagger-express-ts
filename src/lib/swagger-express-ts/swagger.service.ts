@@ -171,6 +171,9 @@ export class SwaggerService {
                 type: property.itemType
               };
             }
+            if (property.example) {
+              newProperty.example = property.example;
+            }
             if (property.model) {
               if (
                 _.isEqual(
@@ -188,6 +191,7 @@ export class SwaggerService {
             if (property.required) {
               newDefinition.required.push(propertyIndex);
             }
+
             newDefinition.properties[propertyIndex] = newProperty;
 
             definitions[modelIndex] = newDefinition;
@@ -416,6 +420,7 @@ export class SwaggerService {
       swaggerBuildDefinitionModelProperty.description = args.description;
       swaggerBuildDefinitionModelProperty.enum = args.enum;
       swaggerBuildDefinitionModelProperty.itemType = args.itemType;
+      swaggerBuildDefinitionModelProperty.example = args.example;
       if (args.model) {
         swaggerBuildDefinitionModelProperty.model = args.model;
         if (!_.isEqual("Array", propertyType)) {

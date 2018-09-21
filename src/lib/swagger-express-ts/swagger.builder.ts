@@ -43,6 +43,11 @@ export interface ISwaggerBuildDefinitionModelProperty {
    * Optional.
    */
   description?: string;
+  /**
+   * Define example.
+   * Optional.
+   */
+  example?: string | number;
 
   /**
    * Define type of item. Example: SwaggerDefinitionConstant.Definition.Property.Type.STRING

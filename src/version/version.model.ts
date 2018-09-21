@@ -8,18 +8,21 @@ import { AuthorModel } from "../author/author.model";
 export class VersionModel {
   @ApiModelProperty({
     description: "Id of version",
+    example: 1,
     required: true
   })
-  public id: string;
+  public id: string | number;
 
   @ApiModelProperty({
     description: "",
+    example: "New version",
     required: true
   })
   public name: string;
 
   @ApiModelProperty({
     description: "Description of version",
+    example: "My awesome description",
     required: true
   })
   public description: string;
