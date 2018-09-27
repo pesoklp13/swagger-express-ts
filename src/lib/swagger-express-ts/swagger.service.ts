@@ -1,15 +1,14 @@
 import {
   ISwagger,
-  ISwaggerContact,
   ISwaggerDefinition,
   ISwaggerDefinitionProperty,
   ISwaggerExternalDocs,
   ISwaggerInfo,
-  ISwaggerLicense,
   ISwaggerOperation,
   ISwaggerOperationParameter,
   ISwaggerPath,
-  ISwaggerTag
+  ISwaggerTag,
+  SWAGGER_VERSION
 } from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
@@ -31,14 +30,14 @@ import {
 } from "./swagger.builder";
 import { ReferenceBuilder } from "./builders/reference.builder";
 import { ResponseBuilder } from "./builders/response.builder";
-
-type OperationMethods = "get" | "post" | "put" | "patch" | "delete";
 import {
-  NotEmpty,
   Pattern,
   PatternEnum,
   Validate
 } from "./decorators/validate.decorator";
+import { InfoObjectBuilder } from "./builders/info-object.builder";
+
+type OperationMethods = "get" | "post" | "put" | "patch" | "delete";
 
 interface IPath {
   path?: string;
@@ -72,10 +71,17 @@ export class SwaggerService {
   private controllerMap: IController[] = [];
   private data: ISwagger;
   private modelsMap: { [key: string]: ISwaggerBuildDefinitionModel } = {};
-  private refBuilder: ReferenceBuilder = new ReferenceBuilder();
-  private responseBuilder: ResponseBuilder = new ResponseBuilder();
 
-  private constructor() {}
+  private constructor(
+    private refBuilder: ReferenceBuilder = new ReferenceBuilder(),
+    private responseBuilder: ResponseBuilder = new ResponseBuilder(),
+    private infoBuilder: InfoObjectBuilder = new InfoObjectBuilder()
+  ) {}
+
+  public withInfoBuilder(infoBuilder: InfoObjectBuilder): SwaggerService {
+    this.infoBuilder = infoBuilder;
+    return this;
+  }
 
   public resetData(): void {
     this.controllerMap = [];
@@ -95,26 +101,19 @@ export class SwaggerService {
   }
 
   public setInfo(info: ISwaggerInfo): void {
-    this.data.info = {
-      title: info.title,
-      version: info.version
-    };
-
-    if (info.description) {
-      this.data.info.description = info.description;
-    }
-
-    if (info.termsOfService) {
-      this.data.info.termsOfService = info.termsOfService;
-    }
+    this.infoBuilder.withDefaultValues(info.title, info.version);
+    this.infoBuilder.withDescription(info.description);
+    this.infoBuilder.withTermsOfService(info.termsOfService);
 
     if (info.contact) {
-      this.setContact(info.contact);
+      this.infoBuilder.withContact(info.contact);
     }
 
     if (info.license) {
-      this.setLicense(info.license);
+      this.infoBuilder.withLicense(info.license);
     }
+
+    this.data.info = this.infoBuilder.build();
   }
 
   public setSchemes(schemes: string[]): void {
@@ -440,22 +439,6 @@ export class SwaggerService {
     this.setDefinitions(this.modelsMap);
   }
 
-  @Validate
-  private setContact(
-    @Pattern({ pattern: PatternEnum.URI, path: "url", nullable: true })
-    @Pattern({ pattern: PatternEnum.EMAIL, path: "email", nullable: true })
-    contact: ISwaggerContact
-  ) {
-    this.data.info.contact = contact;
-  }
-
-  @Validate
-  private setLicense(
-    @Pattern({ pattern: PatternEnum.URI, path: "url", nullable: true })
-    license: ISwaggerLicense
-  ) {
-    this.data.info.license = license;
-  }
   private addOperation(
     operation: OperationMethods,
     args: IApiOperationArgsBase,
@@ -702,7 +685,7 @@ export class SwaggerService {
       produces: [SwaggerDefinitionConstant.Produce.JSON],
       consumes: [SwaggerDefinitionConstant.Consume.JSON],
       definitions: {},
-      swagger: "2.0"
+      swagger: SWAGGER_VERSION
     };
   }
 }

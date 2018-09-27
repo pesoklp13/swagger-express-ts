@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { SwaggerService } from "./swagger.service";
 import * as chai from "chai";
+import * as sinon from "sinon";
 import { ISwaggerExternalDocs, ISwaggerInfo, ISwaggerPath } from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationGetArgs } from "./api-operation-get.decorator";
@@ -12,6 +13,7 @@ import { SwaggerDefinitionConstant } from "./swagger-definition.constant";
 import { ISwaggerBuildDefinitionModel } from "./swagger.builder";
 import { DataType } from "./i-api-operation-args.base";
 import { VersionsController } from "../../version/versions.controller";
+import { InfoObjectBuilder } from "./builders/info-object.builder";
 
 const expect = chai.expect;
 
@@ -52,96 +54,79 @@ describe("SwaggerService", () => {
 
   describe("setInfo", () => {
     let info: ISwaggerInfo;
+    let swaggerService: SwaggerService;
+
+    let withDescriptionSpy: any;
+    let withTermsOfServiceSpy: any;
+    let withConcactSpy: any;
+    let withLicenseSpy: any;
+    let buildSpy: any;
+    let withDefaultValuesSpy: any;
 
     beforeEach(() => {
       info = {
         title: "Title",
-        version: "1.0.1"
+        version: "1.0.1",
+        description: "description",
+        termsOfService: "termsOfService"
       };
-    });
 
-    it("expect default info", () => {
-      expect(SwaggerService.getInstance().getData().info.title).to.equal(
-        "Generated swagger project"
+      const infoBuilder = new InfoObjectBuilder();
+      withDescriptionSpy = sinon.spy(infoBuilder, "withDescription");
+      withTermsOfServiceSpy = sinon.spy(infoBuilder, "withTermsOfService");
+      withConcactSpy = sinon.spy(infoBuilder, "withContact");
+      withLicenseSpy = sinon.spy(infoBuilder, "withLicense");
+      buildSpy = sinon.spy(infoBuilder, "build");
+      withDefaultValuesSpy = sinon.spy(infoBuilder, "withDefaultValues");
+
+      swaggerService = SwaggerService.getInstance().withInfoBuilder(
+        infoBuilder
       );
-      expect(SwaggerService.getInstance().getData().info.version).to.equal(
-        "1.0.0"
-      );
     });
 
-    it("expect info when it defined", () => {
-      SwaggerService.getInstance().setInfo(info);
+    it("should be called InfoObjectBuilder without contact and license", () => {
+      swaggerService.setInfo(info);
 
-      expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
+      expectDefaultSpyObjects();
+      expect(withConcactSpy.notCalled).to.be.true;
+      expect(withLicenseSpy.notCalled).to.be.true;
+      expect(swaggerService.getData().info).to.be.deep.equal(info);
     });
 
-    it("should not fail when contact with valid url set", () => {
+    it("should be called InfoObjectBuilder with contact", () => {
       info.contact = {
-        url: "http://localhost:8080"
+        name: "name"
       };
 
-      SwaggerService.getInstance().setInfo(info);
-      expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
+      swaggerService.setInfo(info);
+
+      expectDefaultSpyObjects();
+      expect(withConcactSpy.calledOnce).to.be.true;
+      expect(withLicenseSpy.notCalled).to.be.true;
+
+      expect(swaggerService.getData().info).to.be.deep.equal(info);
     });
 
-    it("should not fail when contact with no url set", () => {
-      info.contact = {
-        name: "contactName"
-      };
-
-      SwaggerService.getInstance().setInfo(info);
-      expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
-    });
-
-    it("should fail when contact with invalid url set", () => {
-      info.contact = {
-        url: "localhost"
-      };
-
-      expect(() => {
-        SwaggerService.getInstance().setInfo(info);
-      }).to.throw("url has to be valid URI");
-    });
-
-    it("should fail when invalid mail set for contact", () => {
-      info.contact = {
-        email: "badmail"
-      };
-
-      expect(() => {
-        SwaggerService.getInstance().setInfo(info);
-      }).to.throw("email has to be valid EMAIL");
-    });
-
-    it("should not fail when license with valid url set", () => {
+    it("should be called InfoObjectBuilder with license", () => {
       info.license = {
-        name: "license",
-        url: "http://localhost:8080"
+        name: "name"
       };
 
-      SwaggerService.getInstance().setInfo(info);
-      expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
+      swaggerService.setInfo(info);
+
+      expectDefaultSpyObjects();
+      expect(withConcactSpy.notCalled).to.be.true;
+      expect(withLicenseSpy.calledOnce).to.be.true;
+
+      expect(swaggerService.getData().info).to.be.deep.equal(info);
     });
 
-    it("should not fail when license with no url set", () => {
-      info.license = {
-        name: "license"
-      };
-
-      SwaggerService.getInstance().setInfo(info);
-      expect(SwaggerService.getInstance().getData().info).to.deep.equal(info);
-    });
-
-    it("should fail when license with invalid url set", () => {
-      info.license = {
-        name: "license",
-        url: "localhost"
-      };
-
-      expect(() => {
-        SwaggerService.getInstance().setInfo(info);
-      }).to.throw("url has to be valid URI");
-    });
+    function expectDefaultSpyObjects() {
+      expect(withTermsOfServiceSpy.calledOnce).to.be.true;
+      expect(withDefaultValuesSpy.calledOnce).to.be.true;
+      expect(withDescriptionSpy.calledOnce).to.be.true;
+      expect(buildSpy.calledOnce).to.be.true;
+    }
   });
 
   describe("setSchemes", () => {

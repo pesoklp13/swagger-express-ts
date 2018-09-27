@@ -60,10 +60,6 @@ export interface ISwaggerOperationSchema {
   format?: string;
 }
 
-export interface ISwaggerOperationSchemaItems {
-  $ref: string;
-}
-
 export interface ISwaggerOperationResponse {
   description: string;
   schema?: ISwaggerOperationSchema;
@@ -123,6 +119,9 @@ export interface ISwaggerDefinition {
   description?: string;
 }
 
+export const SWAGGER_VERSION = "2.0";
+export type SWAGGER_VERSION_TYPE = "2.0";
+
 export interface ISwagger {
   basePath?: string;
   openapi?: string;
@@ -130,7 +129,7 @@ export interface ISwagger {
   servers?: [ISwaggerServer];
   paths?: { [key: string]: ISwaggerPath };
   host?: string;
-  swagger: string;
+  swagger: SWAGGER_VERSION_TYPE;
   tags?: ISwaggerTag[];
   schemes: string[]; // Example : SwaggerDefinition.Scheme.HTTP
   produces: string[]; // Example : SwaggerDefinition.Produce.JSON
