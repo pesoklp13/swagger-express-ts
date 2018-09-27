@@ -58,7 +58,7 @@ export class VersionsController implements interfaces.Controller {
     summary: "Get version",
     responses: {
       200: {
-        type: SwaggerDefinitionConstant.Response.Type.OBJECT,
+        type: DataType.object,
         model: "Version"
       }
     },

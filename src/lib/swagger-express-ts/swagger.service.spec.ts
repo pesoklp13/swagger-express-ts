@@ -2311,7 +2311,7 @@ describe("SwaggerService", () => {
       summary: "Get versions list",
       responses: {
         200: {
-          type: SwaggerDefinitionConstant.Response.Type.ARRAY,
+          type: DataType.array,
           model: "Version"
         }
       }
@@ -2323,7 +2323,7 @@ describe("SwaggerService", () => {
       path: "/:id",
       responses: {
         200: {
-          type: SwaggerDefinitionConstant.Response.Type.OBJECT,
+          type: DataType.object,
           model: "Version"
         }
       }
@@ -2334,7 +2334,7 @@ describe("SwaggerService", () => {
       summary: "Get versions list duplicate",
       responses: {
         200: {
-          type: SwaggerDefinitionConstant.Response.Type.ARRAY,
+          type: DataType.array,
           model: "Version"
         }
       }
