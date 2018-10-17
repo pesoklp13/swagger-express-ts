@@ -65,3 +65,4 @@ src/**/*.js
 example/**/*.js
 .idea
 .vscode
+*.iml
