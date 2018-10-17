@@ -11,3 +11,4 @@ tsconfig.json
 tsconfig.package.json
 tslint.json
 .idea/
+swagger-express-ts2.iml
