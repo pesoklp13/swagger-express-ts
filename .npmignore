@@ -6,7 +6,7 @@ swagger/
 .gitignore
 config.json
 config.template.json
-gulpfile.js
+gulpfile.babel.js
 tsconfig.json
 tsconfig.package.json
 tslint.json
