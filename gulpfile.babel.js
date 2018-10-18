@@ -33,7 +33,7 @@ const copySrcScript = () => {
     return gulp.src([path.app.src]).pipe(gulp.dest(path.built));
 };
 
-const prettier = () => {
+export const prettier = () => {
     return (
         gulp
             .src([path.app.src])
