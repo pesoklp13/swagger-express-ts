@@ -119,6 +119,13 @@ export interface ISwaggerDefinition {
   description?: string;
 }
 
+export enum SwaggerScheme {
+  HTTP = "http",
+  HTTPS = "https",
+  WS = "ws",
+  WSS = "wss"
+}
+
 export const SWAGGER_VERSION = "2.0";
 export type SWAGGER_VERSION_TYPE = "2.0";
 
@@ -131,7 +138,7 @@ export interface ISwagger {
   host?: string;
   swagger: SWAGGER_VERSION_TYPE;
   tags?: ISwaggerTag[];
-  schemes: string[]; // Example : SwaggerDefinition.Scheme.HTTP
+  schemes: SwaggerScheme[]; // Example : SwaggerDefinition.Scheme.HTTP
   produces: string[]; // Example : SwaggerDefinition.Produce.JSON
   consumes: string[]; // Example : SwaggerDefinition.Consume.JSON
   definitions: { [key: string]: ISwaggerDefinition };

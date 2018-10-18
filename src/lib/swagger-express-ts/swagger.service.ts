@@ -8,7 +8,8 @@ import {
   ISwaggerOperationParameter,
   ISwaggerPath,
   ISwaggerTag,
-  SWAGGER_VERSION
+  SWAGGER_VERSION,
+  SwaggerScheme
 } from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
@@ -116,7 +117,7 @@ export class SwaggerService {
     this.data.info = this.infoBuilder.build();
   }
 
-  public setSchemes(schemes: string[]): void {
+  public setSchemes(schemes: SwaggerScheme[]): void {
     this.data.schemes = schemes;
   }
 
@@ -681,7 +682,7 @@ export class SwaggerService {
       },
       paths: {},
       tags: [],
-      schemes: [SwaggerDefinitionConstant.Scheme.HTTP],
+      schemes: [SwaggerScheme.HTTP],
       produces: [SwaggerDefinitionConstant.Produce.JSON],
       consumes: [SwaggerDefinitionConstant.Consume.JSON],
       definitions: {},

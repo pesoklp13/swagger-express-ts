@@ -1,4 +1,4 @@
-import { ISwaggerExternalDocs, ISwaggerInfo } from "./i-swagger";
+import { ISwaggerExternalDocs, ISwaggerInfo, SwaggerScheme } from "./i-swagger";
 import * as assert from "assert";
 import { SwaggerService } from "./swagger.service";
 import { IApiOperationArgsBaseResponse } from "./i-api-operation-args.base";
@@ -110,9 +110,9 @@ export interface ISwaggerBuildDefinition {
 
   /**
    * Define schemes.
-   * Optional. Default is SwaggerDefinition.Scheme.HTTP = "http".
+   * Optional. Default is SwaggerDefinition.Scheme.HTTP = "HTTP".
    */
-  schemes?: string[];
+  schemes?: SwaggerScheme[];
 
   /**
    * Define host.

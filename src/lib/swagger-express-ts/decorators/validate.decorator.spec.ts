@@ -80,7 +80,7 @@ describe("Validators", () => {
     describe("URI", () => {
       describe("match a (commonly found) URI", () => {
         const uri =
-          "http://user:password@example.com:8080/some/arguments/to/somewhere?search=regex&order=desc#fragment";
+          "HTTP://user:password@example.com:8080/some/arguments/to/somewhere?search=regex&order=desc#fragment";
 
         it("should match from string", () => {
           validatePattern(uri, {
@@ -162,7 +162,7 @@ describe("Validators", () => {
       });
 
       it("should match unicode hostnames", () => {
-        const uri = "https://www.日本平.jp";
+        const uri = "HTTPS://www.日本平.jp";
 
         validatePattern(uri, {
           pattern: PatternEnum.URI,
@@ -171,7 +171,7 @@ describe("Validators", () => {
       });
 
       it("should match punycode hostnames", () => {
-        const uri = "http://www.xn--gwtq9nb2a.jp";
+        const uri = "HTTP://www.xn--gwtq9nb2a.jp";
 
         validatePattern(uri, {
           pattern: PatternEnum.URI,
@@ -180,7 +180,7 @@ describe("Validators", () => {
       });
 
       it("should match percent encoded parts", () => {
-        const uri = "http://www.fran%c3%a7ois.fr/fran%c3%a7ois";
+        const uri = "HTTP://www.fran%c3%a7ois.fr/fran%c3%a7ois";
 
         validatePattern(uri, {
           pattern: PatternEnum.URI,
@@ -197,8 +197,8 @@ describe("Validators", () => {
         });
       });
 
-      it("http://www.ietf.org/rfc/rfc2396.txt", () => {
-        const uri = "http://www.ietf.org/rfc/rfc2396.txt";
+      it("HTTP://www.ietf.org/rfc/rfc2396.txt", () => {
+        const uri = "HTTP://www.ietf.org/rfc/rfc2396.txt";
 
         validatePattern(uri, {
           pattern: PatternEnum.URI,
@@ -255,9 +255,9 @@ describe("Validators", () => {
     });
 
     describe("HOST", () => {
-      it("should fail when http prefix defined", () => {
+      it("should fail when HTTP prefix defined", () => {
         expect(() => {
-          validatePattern("http://www.test.com", {
+          validatePattern("HTTP://www.test.com", {
             pattern: PatternEnum.HOST,
             path: propertyName
           });
@@ -314,7 +314,7 @@ describe("Validators", () => {
   describe("Pattern", () => {
     it("should match a (commonly found) URI", () => {
       const uri =
-        "http://user:password@example.com:8080/some/arguments/to/somewhere?search=regex&order=desc#fragment";
+        "HTTP://user:password@example.com:8080/some/arguments/to/somewhere?search=regex&order=desc#fragment";
       const testClass = new TestClass(uri);
 
       testClass.testValidateURIMethod(uri);

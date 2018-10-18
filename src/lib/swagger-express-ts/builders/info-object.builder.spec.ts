@@ -43,7 +43,7 @@ describe("InfoObjectBuilder", () => {
   it("should build info object with contact", () => {
     const contact = {
       name: "name",
-      url: "http://test.eu",
+      url: "HTTP://test.eu",
       email: "test@test.eu"
     };
 
@@ -77,7 +77,7 @@ describe("InfoObjectBuilder", () => {
   it("should build info object with license", () => {
     const license = {
       name: "name",
-      url: "http://test.eu"
+      url: "HTTP://test.eu"
     };
 
     builder.withLicense(license);

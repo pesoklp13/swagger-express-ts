@@ -43,8 +43,8 @@ export class SwaggerDefinitionConstant {
   };
 
   public static Scheme = {
-    HTTP: "http",
-    HTTPS: "https"
+    HTTP: "HTTP",
+    HTTPS: "HTTPS"
   };
 
   public static Consume = {

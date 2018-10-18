@@ -2,7 +2,12 @@ import "reflect-metadata";
 import { SwaggerService } from "./swagger.service";
 import * as chai from "chai";
 import * as sinon from "sinon";
-import { ISwaggerExternalDocs, ISwaggerInfo, ISwaggerPath } from "./i-swagger";
+import {
+  ISwaggerExternalDocs,
+  ISwaggerInfo,
+  ISwaggerPath,
+  SwaggerScheme
+} from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationGetArgs } from "./api-operation-get.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
@@ -133,13 +138,17 @@ describe("SwaggerService", () => {
     it("expect default schemes when it not defined", () => {
       expect(SwaggerService.getInstance().getData().schemes)
         .to.have.lengthOf(1)
-        .to.have.members([SwaggerDefinitionConstant.Scheme.HTTP]);
+        .to.have.members([SwaggerScheme.HTTP]);
+
+      expect(
+        JSON.stringify(SwaggerService.getInstance().getData().schemes)
+      ).to.deep.equals(JSON.stringify(["http"]));
     });
 
     it("expect schemes when it defined", () => {
-      const schemes: string[] = [
-        SwaggerDefinitionConstant.Scheme.HTTP,
-        SwaggerDefinitionConstant.Scheme.HTTPS
+      const schemes: SwaggerScheme[] = [
+        SwaggerScheme.HTTP,
+        SwaggerScheme.HTTPS
       ];
 
       SwaggerService.getInstance().setSchemes(schemes);
@@ -147,6 +156,10 @@ describe("SwaggerService", () => {
       expect(SwaggerService.getInstance().getData().schemes).to.deep.equal(
         schemes
       );
+
+      expect(
+        JSON.stringify(SwaggerService.getInstance().getData().schemes)
+      ).to.deep.equals(JSON.stringify(["http", "https"]));
     });
   });
 
@@ -157,7 +170,7 @@ describe("SwaggerService", () => {
 
     it("expect externalDocs when it defined", () => {
       const externalDocs: ISwaggerExternalDocs = {
-        url: "http://localhost:8080"
+        url: "HTTP://localhost:8080"
       };
 
       SwaggerService.getInstance().setExternalDocs(externalDocs);
@@ -233,7 +246,7 @@ describe("SwaggerService", () => {
     });
     it("should fail when set bad host", () => {
       expect(() => {
-        SwaggerService.getInstance().setHost("http://host");
+        SwaggerService.getInstance().setHost("HTTP://host");
       }).to.throw("host has to be valid HOST");
     });
   });
