@@ -1,7 +1,8 @@
-import { ISwaggerExternalDocs, ISwaggerInfo, SwaggerScheme } from "./i-swagger";
+import { ISwaggerExternalDocs, ISwaggerInfo } from "./i-swagger";
 import * as assert from "assert";
 import { SwaggerService } from "./swagger.service";
 import { IApiOperationArgsBaseResponse } from "./i-api-operation-args.base";
+import { SwaggerScheme } from "./swagger-definition.constant";
 
 export interface ISwaggerBuildDefinitionModelProperty {
   /**

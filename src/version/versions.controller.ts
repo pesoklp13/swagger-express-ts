@@ -10,11 +10,11 @@ import {
 import {
   ApiOperationGet,
   ApiOperationPost,
-  ApiPath
+  ApiPath,
+  DataType
 } from "../lib/swagger-express-ts";
 import { VersionsService } from "./versions.service";
 import { VersionModel } from "./version.model";
-import { DataType } from "../lib/swagger-express-ts/i-api-operation-args.base";
 
 @ApiPath({
   path: "/versions",

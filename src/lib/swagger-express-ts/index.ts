@@ -28,6 +28,10 @@ export {
 } from "./api-model-property.decorator";
 export { IApiModelArgs, ApiModel } from "./api-model.decorator";
 
-export { SwaggerDefinitionConstant } from "./swagger-definition.constant";
+export {
+  SwaggerDefinitionConstant,
+  DataType,
+  SwaggerScheme
+} from "./swagger-definition.constant";
 export { express, ISwaggerExpressOptions } from "./express.configurator";
 export { build } from "./swagger.builder";

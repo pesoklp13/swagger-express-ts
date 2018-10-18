@@ -14,7 +14,6 @@ import * as _ from "lodash";
 // import models
 import "./version/version.model";
 import "./author/author.model";
-import { SwaggerScheme } from "./lib/swagger-express-ts/i-swagger";
 
 // set up container
 const container = new Container();
@@ -51,7 +50,7 @@ server.setConfig((app: any) => {
           }
         },
         host: "localhost:9001",
-        schemes: [SwaggerScheme.HTTP, SwaggerScheme.HTTPS],
+        schemes: [swagger.SwaggerScheme.HTTP, swagger.SwaggerScheme.HTTPS],
         models: {
           //    Version : {
           //        properties : {

@@ -1,12 +1,12 @@
-import {
-  DataType,
-  IApiOperationArgsBaseResponse
-} from "../i-api-operation-args.base";
+import { IApiOperationArgsBaseResponse } from "../i-api-operation-args.base";
 import {
   ISwaggerOperationResponse,
   ISwaggerOperationSchema
 } from "../i-swagger";
-import { SwaggerDefinitionConstant } from "../swagger-definition.constant";
+import {
+  DataType,
+  SwaggerDefinitionConstant
+} from "../swagger-definition.constant";
 import { ReferenceBuilder } from "./reference.builder";
 import { NotEmpty, Validate } from "../decorators/validate.decorator";
 

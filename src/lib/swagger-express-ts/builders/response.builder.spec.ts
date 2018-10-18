@@ -1,7 +1,9 @@
 import { ResponseBuilder } from "./response.builder";
 import * as chai from "chai";
-import { SwaggerDefinitionConstant } from "../swagger-definition.constant";
-import { DataType } from "../i-api-operation-args.base";
+import {
+  DataType,
+  SwaggerDefinitionConstant
+} from "../swagger-definition.constant";
 import { ISwaggerOperationResponse } from "../i-swagger";
 
 const expect = chai.expect;

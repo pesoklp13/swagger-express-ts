@@ -1,3 +1,5 @@
+import { DataType } from "./swagger-definition.constant";
+
 export interface IApiOperationArgsBaseParameter {
   description?: string;
   type?: string;
@@ -6,23 +8,6 @@ export interface IApiOperationArgsBaseParameter {
   deprecated?: boolean;
   allowEmptyValue?: boolean;
   model?: string;
-}
-
-export enum DataType {
-  integer,
-  long,
-  float,
-  double,
-  string,
-  byte,
-  binary,
-  boolean,
-  date,
-  dateTime,
-  password,
-  object,
-  array,
-  file
 }
 
 export interface IApiOperationArgsBaseResponse {

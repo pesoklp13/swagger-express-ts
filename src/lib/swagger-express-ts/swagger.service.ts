@@ -8,12 +8,14 @@ import {
   ISwaggerOperationParameter,
   ISwaggerPath,
   ISwaggerTag,
-  SWAGGER_VERSION,
-  SwaggerScheme
+  SWAGGER_VERSION
 } from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
-import { SwaggerDefinitionConstant } from "./swagger-definition.constant";
+import {
+  SwaggerDefinitionConstant,
+  SwaggerScheme
+} from "./swagger-definition.constant";
 import * as _ from "lodash";
 import {
   IApiOperationArgsBase,

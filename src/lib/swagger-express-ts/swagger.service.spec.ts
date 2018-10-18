@@ -2,21 +2,19 @@ import "reflect-metadata";
 import { SwaggerService } from "./swagger.service";
 import * as chai from "chai";
 import * as sinon from "sinon";
-import {
-  ISwaggerExternalDocs,
-  ISwaggerInfo,
-  ISwaggerPath,
-  SwaggerScheme
-} from "./i-swagger";
+import { ISwaggerExternalDocs, ISwaggerInfo, ISwaggerPath } from "./i-swagger";
 import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationGetArgs } from "./api-operation-get.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
 import { IApiOperationPutArgs } from "./api-operation-put.decorator";
 import { IApiOperationPatchArgs } from "./api-operation-patch.decorator";
 import { IApiOperationDeleteArgs } from "./api-operation-delete.decorator";
-import { SwaggerDefinitionConstant } from "./swagger-definition.constant";
+import {
+  DataType,
+  SwaggerDefinitionConstant,
+  SwaggerScheme
+} from "./swagger-definition.constant";
 import { ISwaggerBuildDefinitionModel } from "./swagger.builder";
-import { DataType } from "./i-api-operation-args.base";
 import { VersionsController } from "../../version/versions.controller";
 import { InfoObjectBuilder } from "./builders/info-object.builder";
 

@@ -42,11 +42,6 @@ export class SwaggerDefinitionConstant {
     JPEG: SwaggerDefinitionConstant.JPEG
   };
 
-  public static Scheme = {
-    HTTP: "HTTP",
-    HTTPS: "HTTPS"
-  };
-
   public static Consume = {
     XML: SwaggerDefinitionConstant.XML,
     JSON: SwaggerDefinitionConstant.JSON
@@ -197,4 +192,28 @@ export class SwaggerDefinitionConstant {
       QUERY: SwaggerDefinitionConstant.QUERY
     }
   };
+}
+
+export enum DataType {
+  integer,
+  long,
+  float,
+  double,
+  string,
+  byte,
+  binary,
+  boolean,
+  date,
+  dateTime,
+  password,
+  object,
+  array,
+  file
+}
+
+export enum SwaggerScheme {
+  HTTP = "http",
+  HTTPS = "https",
+  WS = "ws",
+  WSS = "wss"
 }

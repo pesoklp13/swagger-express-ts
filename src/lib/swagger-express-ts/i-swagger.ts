@@ -1,4 +1,5 @@
 import { ISwaggerSecurityDefinition } from "./swagger.builder";
+import { SwaggerScheme } from "./swagger-definition.constant";
 
 export interface ISwaggerLicense {
   name: string;
@@ -117,13 +118,6 @@ export interface ISwaggerDefinition {
   properties: { [key: string]: ISwaggerDefinitionProperty };
   xml?: ISwaggerDefinitionXML;
   description?: string;
-}
-
-export enum SwaggerScheme {
-  HTTP = "http",
-  HTTPS = "https",
-  WS = "ws",
-  WSS = "wss"
 }
 
 export const SWAGGER_VERSION = "2.0";
