@@ -12,15 +12,19 @@ import { IApiOperationDeleteArgs } from "./api-operation-delete.decorator";
 import {
   DataType,
   SwaggerDefinitionConstant,
+  SwaggerMimeType,
   SwaggerScheme
 } from "./swagger-definition.constant";
 import { ISwaggerBuildDefinitionModel } from "./swagger.builder";
 import { VersionsController } from "../../version/versions.controller";
 import { InfoObjectBuilder } from "./builders/info-object.builder";
+import { MimeTypeUtil } from "./utils/mime-type.util";
 
 const expect = chai.expect;
 
 describe("SwaggerService", () => {
+  const valueOfSpy = sinon.spy(MimeTypeUtil, "valueOf");
+
   beforeEach(() => {
     SwaggerService.getInstance().resetData();
   });
@@ -189,16 +193,20 @@ describe("SwaggerService", () => {
   });
 
   describe("setProduces", () => {
+    beforeEach(() => {
+      valueOfSpy.reset();
+    });
+
     it("expect default produces when it not defined", () => {
       expect(SwaggerService.getInstance().getData().produces)
         .to.have.lengthOf(1)
-        .to.have.members([SwaggerDefinitionConstant.Produce.JSON]);
+        .to.have.members([SwaggerMimeType.APPLICATION_JSON]);
     });
 
     it("expect produces when it defined", () => {
       const produces: string[] = [
-        SwaggerDefinitionConstant.Produce.JSON,
-        SwaggerDefinitionConstant.Produce.XML
+        SwaggerMimeType.APPLICATION_JSON,
+        SwaggerMimeType.APPLICATION_XML
       ];
 
       SwaggerService.getInstance().setProduces(produces);
@@ -206,20 +214,63 @@ describe("SwaggerService", () => {
       expect(SwaggerService.getInstance().getData().produces).to.deep.equal(
         produces
       );
+
+      expect(valueOfSpy.calledTwice).to.be.true;
+    });
+
+    it("should fail when duplicate entry found", () => {
+      const produces: string[] = [
+        SwaggerMimeType.APPLICATION_XML,
+        SwaggerMimeType.APPLICATION_XML
+      ];
+
+      expect(() => {
+        SwaggerService.getInstance().setProduces(produces);
+      }).to.throw('Duplicate entry "application/xml"');
+    });
+
+    it("should set produces from string", () => {
+      const produces: string[] = [
+        "application/xml",
+        "application/vnd.ms-excel"
+      ];
+
+      SwaggerService.getInstance().setProduces(produces);
+
+      expect(SwaggerService.getInstance().getData().produces).to.deep.equal([
+        SwaggerMimeType.APPLICATION_XML,
+        "application/vnd.ms-excel"
+      ]);
+
+      expect(valueOfSpy.calledTwice).to.be.true;
+    });
+
+    it("should fail when empty", () => {
+      expect(() => {
+        SwaggerService.getInstance().setProduces(null);
+      }).to.throw("Cannot be empty");
+
+      expect(() => {
+        SwaggerService.getInstance().setProduces([]);
+      }).to.throw("Cannot be empty");
     });
   });
 
   describe("setConsumes", () => {
+    beforeEach(() => {
+      valueOfSpy.reset();
+    });
+
     it("expect default consumes when it not defined", () => {
       expect(SwaggerService.getInstance().getData().consumes)
         .to.have.lengthOf(1)
-        .to.have.members([SwaggerDefinitionConstant.Consume.JSON]);
+        .to.have.members([SwaggerMimeType.APPLICATION_JSON]);
     });
 
     it("expect consumes when it defined", () => {
       const consumes: string[] = [
-        SwaggerDefinitionConstant.Consume.JSON,
-        SwaggerDefinitionConstant.Consume.XML
+        SwaggerMimeType.APPLICATION_JSON,
+        SwaggerMimeType.APPLICATION_XML
       ];
 
       SwaggerService.getInstance().setConsumes(consumes);
@@ -227,6 +278,45 @@ describe("SwaggerService", () => {
       expect(SwaggerService.getInstance().getData().consumes).to.deep.equal(
         consumes
       );
+
+      expect(valueOfSpy.calledTwice).to.be.true;
+    });
+
+    it("should fail when duplicate entry found", () => {
+      const consumes: string[] = [
+        SwaggerMimeType.APPLICATION_XML,
+        SwaggerMimeType.APPLICATION_XML
+      ];
+
+      expect(() => {
+        SwaggerService.getInstance().setConsumes(consumes);
+      }).to.throw('Duplicate entry "application/xml"');
+    });
+
+    it("should set produces from string", () => {
+      const consumes: string[] = [
+        "application/xml",
+        "application/vnd.ms-excel"
+      ];
+
+      SwaggerService.getInstance().setConsumes(consumes);
+
+      expect(SwaggerService.getInstance().getData().consumes).to.deep.equal([
+        SwaggerMimeType.APPLICATION_XML,
+        "application/vnd.ms-excel"
+      ]);
+
+      expect(valueOfSpy.calledTwice).to.be.true;
+    });
+
+    it("should fail when empty", () => {
+      expect(() => {
+        SwaggerService.getInstance().setConsumes(null);
+      }).to.throw("Cannot be empty");
+
+      expect(() => {
+        SwaggerService.getInstance().setConsumes([]);
+      }).to.throw("Cannot be empty");
     });
   });
 

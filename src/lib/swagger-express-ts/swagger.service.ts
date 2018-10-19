@@ -14,6 +14,7 @@ import { IApiPathArgs } from "./api-path.decorator";
 import { IApiOperationPostArgs } from "./api-operation-post.decorator";
 import {
   SwaggerDefinitionConstant,
+  SwaggerMimeType,
   SwaggerScheme
 } from "./swagger-definition.constant";
 import * as _ from "lodash";
@@ -34,11 +35,14 @@ import {
 import { ReferenceBuilder } from "./builders/reference.builder";
 import { ResponseBuilder } from "./builders/response.builder";
 import {
+  NoDuplicates,
+  NotEmpty,
   Pattern,
   PatternEnum,
   Validate
 } from "./decorators/validate.decorator";
 import { InfoObjectBuilder } from "./builders/info-object.builder";
+import { MimeTypeUtil } from "./utils/mime-type.util";
 
 type OperationMethods = "get" | "post" | "put" | "patch" | "delete";
 
@@ -123,12 +127,26 @@ export class SwaggerService {
     this.data.schemes = schemes;
   }
 
-  public setProduces(produces: string[]): void {
-    this.data.produces = produces;
+  @Validate
+  public setProduces(
+    @NotEmpty()
+    @NoDuplicates()
+    produces: Array<string | SwaggerMimeType>
+  ): void {
+    this.data.produces = produces.map(mimeType =>
+      MimeTypeUtil.valueOf(mimeType)
+    );
   }
 
-  public setConsumes(consumes: string[]): void {
-    this.data.consumes = consumes;
+  @Validate
+  public setConsumes(
+    @NotEmpty()
+    @NoDuplicates()
+    consumes: Array<string | SwaggerMimeType>
+  ): void {
+    this.data.consumes = consumes.map(mimeType =>
+      MimeTypeUtil.valueOf(mimeType)
+    );
   }
 
   @Validate

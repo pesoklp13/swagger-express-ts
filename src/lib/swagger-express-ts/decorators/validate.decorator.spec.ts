@@ -2,6 +2,7 @@ import "reflect-metadata";
 import * as chai from "chai";
 import {
   getProperty,
+  NoDuplicates,
   NotEmpty,
   Pattern,
   PatternEnum,
@@ -35,6 +36,11 @@ describe("Validators", () => {
     @Validate
     public testValidateNotEmptyMethod(@NotEmpty() object: any) {
       expect(object !== null).to.be.true("");
+    }
+
+    @Validate
+    public testValidateNotDuplicateMethod(@NoDuplicates() object: any) {
+      expect(object !== null).to.be.true;
     }
   }
 
@@ -309,6 +315,62 @@ describe("Validators", () => {
         validatePattern("test@test.test", { pattern: PatternEnum.EMAIL });
       });
     });
+
+    describe("MIME_TYPE", () => {
+      it("should fail when invalid prefix set", () => {
+        expect(() => {
+          validatePattern("test/plain", { pattern: PatternEnum.MIME_TYPE });
+        }).to.throw("test/plain has to be valid MIME_TYPE");
+      });
+
+      it("should fail when invalid postfix set", () => {
+        expect(() => {
+          validatePattern("text/plain..", { pattern: PatternEnum.MIME_TYPE });
+        }).to.throw("text/plain.. has to be valid MIME_TYPE");
+      });
+
+      it("should fail when no / found", () => {
+        expect(() => {
+          validatePattern("text", { pattern: PatternEnum.MIME_TYPE });
+        }).to.throw("text has to be valid MIME_TYPE");
+      });
+
+      it("should fail when empty", () => {
+        expect(() => {
+          validatePattern(null, { pattern: PatternEnum.MIME_TYPE });
+        }).to.throw("Validated property is empty. Has to be valid MIME_TYPE");
+      });
+
+      it("should pass when valid MimeType set", () => {
+        expect(
+          validatePattern("text/plain", { pattern: PatternEnum.MIME_TYPE })
+        );
+        expect(
+          validatePattern("application/json", {
+            pattern: PatternEnum.MIME_TYPE
+          })
+        );
+        expect(
+          validatePattern("image/jpeg", { pattern: PatternEnum.MIME_TYPE })
+        );
+        expect(
+          validatePattern("video/mp4", { pattern: PatternEnum.MIME_TYPE })
+        );
+        expect(
+          validatePattern("multipart/form-data", {
+            pattern: PatternEnum.MIME_TYPE
+          })
+        );
+        expect(
+          validatePattern("audio/mpeg", { pattern: PatternEnum.MIME_TYPE })
+        );
+        expect(
+          validatePattern("application/vnd.ms-excel", {
+            pattern: PatternEnum.MIME_TYPE
+          })
+        );
+      });
+    });
   });
 
   describe("Pattern", () => {
@@ -352,6 +414,33 @@ describe("Validators", () => {
       expect(() => {
         testClass.testValidateNotEmptyMethod({});
       }).to.throw("Cannot be empty");
+    });
+  });
+
+  describe("NoDuplicates", () => {
+    const testClass = new TestClass();
+
+    it("should fail when duplicates found", () => {
+      expect(() => {
+        testClass.testValidateNotDuplicateMethod([
+          "a",
+          "b",
+          "a",
+          "b",
+          "c",
+          "d"
+        ]);
+      }).to.throw('Duplicate entry "a"');
+    });
+
+    it("should fail when input is not an array", () => {
+      expect(() => {
+        testClass.testValidateNotDuplicateMethod("a");
+      }).to.throw("Argument has to be array");
+    });
+
+    it("should pass when no duplicates", () => {
+      testClass.testValidateNotDuplicateMethod(["a", "b", "c", "d"]);
     });
   });
 });

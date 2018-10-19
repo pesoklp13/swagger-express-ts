@@ -3,7 +3,8 @@ import * as _ from "lodash";
 export enum PatternEnum {
   URI,
   HOST,
-  EMAIL
+  EMAIL,
+  MIME_TYPE
 }
 
 const URI_PATTERN = new RegExp(
@@ -14,14 +15,20 @@ const HOST_PATTERN = new RegExp("^[^{}/ :\\\\]+(?::\\d+)?$");
 
 const EMAIL_PATTERN = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/;
 
+const MIME_TYPE_PATTERN = new RegExp(
+  "^(application|image|audio|video|text|multipart)+/([\\w-+.]*[\\w])+$"
+);
+
 const PATTERNS: { [pattern: string]: RegExp } = {
   URI: URI_PATTERN,
   HOST: HOST_PATTERN,
-  EMAIL: EMAIL_PATTERN
+  EMAIL: EMAIL_PATTERN,
+  MIME_TYPE: MIME_TYPE_PATTERN
 };
 
 export const PATTERN_KEY = Symbol("PATTERN_KEY");
 export const NOT_EMPTY_KEY = Symbol("NOT_EMPTY_KEY");
+export const NO_DUPLICATES_KEY = Symbol("NO_DUPLICATES_KEY");
 
 /**
  *
@@ -38,9 +45,7 @@ export interface PatternArguments {
   nullable?: boolean;
 }
 
-export function Pattern(
-  patternArguments: PatternArguments
-): ParameterDecorator {
+export function Pattern(patternArguments: PatternArguments) {
   return (
     target: any,
     propertyKey: string | symbol,
@@ -64,7 +69,7 @@ export function Pattern(
   };
 }
 
-export function NotEmpty(): ParameterDecorator {
+export function NotEmpty() {
   return (
     target: any,
     propertyKey: string | symbol,
@@ -76,6 +81,24 @@ export function NotEmpty(): ParameterDecorator {
     Reflect.defineMetadata(
       NOT_EMPTY_KEY,
       existingNotEmptyParameters,
+      target,
+      propertyKey
+    );
+  };
+}
+
+export function NoDuplicates() {
+  return (
+    target: any,
+    propertyKey: string | symbol,
+    parameterIndex: number
+  ) => {
+    const existingNotDuplicateParameters: number[] =
+      Reflect.getOwnMetadata(NO_DUPLICATES_KEY, target, propertyKey) || [];
+    existingNotDuplicateParameters.push(parameterIndex);
+    Reflect.defineMetadata(
+      NO_DUPLICATES_KEY,
+      existingNotDuplicateParameters,
       target,
       propertyKey
     );
@@ -184,8 +207,33 @@ export function Validate(
       }
     }
 
+    // check if array has duplicate if throw exception
+    function checkDuplicates(outerArguments: IArguments) {
+      const existingNotDuplicateParameters: number[] =
+        Reflect.getOwnMetadata(NO_DUPLICATES_KEY, target, propertyName) || [];
+
+      if (existingNotDuplicateParameters) {
+        for (const it of existingNotDuplicateParameters) {
+          const argument = outerArguments[it];
+          if (!_.isArray(argument)) {
+            throw new Error("Argument has to be array");
+          }
+
+          _.forEach(argument, item => {
+            if (
+              _.findIndex(argument, n => n === item) !==
+              _.findLastIndex(argument, n => n === item)
+            ) {
+              throw new Error('Duplicate entry "'.concat(item).concat('"'));
+            }
+          });
+        }
+      }
+    }
+
     checkPattern(arguments);
     checkNotEmpty(arguments);
+    checkDuplicates(arguments);
 
     return method.apply(this, arguments);
   };

@@ -1,5 +1,5 @@
 import { ISwaggerSecurityDefinition } from "./swagger.builder";
-import { SwaggerScheme } from "./swagger-definition.constant";
+import { SwaggerMimeType, SwaggerScheme } from "./swagger-definition.constant";
 
 export interface ISwaggerLicense {
   name: string;
@@ -123,6 +123,8 @@ export interface ISwaggerDefinition {
 export const SWAGGER_VERSION = "2.0";
 export type SWAGGER_VERSION_TYPE = "2.0";
 
+export type ISWaggerMimeType = string | SwaggerMimeType;
+
 export interface ISwagger {
   basePath?: string;
   openapi?: string;
@@ -132,9 +134,9 @@ export interface ISwagger {
   host?: string;
   swagger: SWAGGER_VERSION_TYPE;
   tags?: ISwaggerTag[];
-  schemes: SwaggerScheme[]; // Example : SwaggerDefinition.Scheme.HTTP
-  produces: string[]; // Example : SwaggerDefinition.Produce.JSON
-  consumes: string[]; // Example : SwaggerDefinition.Consume.JSON
+  schemes: SwaggerScheme[];
+  produces: ISWaggerMimeType[];
+  consumes: ISWaggerMimeType[];
   definitions: { [key: string]: ISwaggerDefinition };
   externalDocs?: ISwaggerExternalDocs;
   securityDefinitions?: { [key: string]: ISwaggerSecurityDefinition };
