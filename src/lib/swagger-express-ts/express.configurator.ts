@@ -35,7 +35,8 @@ function buildRouter(path: string): Router {
   const router: Router = Router();
   router.get(path, (request: Request, response: Response) => {
     const data: ISwagger = SwaggerService.getInstance().getData();
-    response.json(data);
+    response.contentType("application/json");
+    response.send(JSON.stringify(data, null, 2));
   });
   return router;
 }

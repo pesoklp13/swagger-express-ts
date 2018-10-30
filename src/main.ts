@@ -46,7 +46,7 @@ server.setConfig((app: any) => {
           version: "1.0",
           contact: {
             email: "admin@swagger-express-ts.com",
-            url: "HTTP://swagger-express-ts.com"
+            url: "http://swagger-express-ts.com"
           }
         },
         host: "localhost:9001",
@@ -127,5 +127,5 @@ const app = server.build();
 if (!_.isEqual(process.env.NODE_ENV, "test")) {
   const port = 9001;
   app.listen(port);
-  console.info("Server is listening on port : " + port);
+  console.info("Server is listening on port https://localhost:" + port);
 }
