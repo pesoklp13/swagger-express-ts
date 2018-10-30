@@ -242,3 +242,13 @@ export enum SwaggerMimeType {
   TEXT_PLAIN = "text/plain",
   TEXT_XML = "text/xml"
 }
+
+export enum HttpMethod {
+  GET = "get",
+  POST = "post",
+  PUT = "put",
+  PATCH = "patch",
+  DELETE = "delete",
+  OPTIONS = "options",
+  HEAD = "head"
+}

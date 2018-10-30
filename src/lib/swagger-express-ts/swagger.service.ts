@@ -43,6 +43,7 @@ import {
 } from "./decorators/validate.decorator";
 import { InfoObjectBuilder } from "./builders/info-object.builder";
 import { MimeTypeUtil } from "./utils/mime-type.util";
+import { PathsObjectBuilder } from "./builders/path/paths-object.builder";
 
 type OperationMethods = "get" | "post" | "put" | "patch" | "delete";
 
@@ -82,12 +83,17 @@ export class SwaggerService {
   private constructor(
     private refBuilder: ReferenceBuilder = new ReferenceBuilder(),
     private responseBuilder: ResponseBuilder = new ResponseBuilder(),
-    private infoBuilder: InfoObjectBuilder = new InfoObjectBuilder()
+    private infoBuilder: InfoObjectBuilder = new InfoObjectBuilder(),
+    private pathsBuilder: PathsObjectBuilder = new PathsObjectBuilder()
   ) {}
 
   public withInfoBuilder(infoBuilder: InfoObjectBuilder): SwaggerService {
     this.infoBuilder = infoBuilder;
     return this;
+  }
+
+  public getPathsBuilder(): PathsObjectBuilder {
+    return this.pathsBuilder;
   }
 
   public resetData(): void {
@@ -330,6 +336,8 @@ export class SwaggerService {
   }
 
   public buildSwagger(): void {
+    // TODO add call of PathsObjectBuilder#build
+
     const data: ISwagger = _.cloneDeep(this.data);
     for (const controllerIndex in this.controllerMap) {
       if (this.controllerMap[controllerIndex]) {
