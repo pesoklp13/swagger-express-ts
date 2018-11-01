@@ -10,9 +10,6 @@ const expect = chai.expect;
 
 describe("PathsObjectBuilder", () => {
   let pathsObjectBuilder: PathsObjectBuilder;
-  const forPath = sinon
-    .stub(PathItemObjectBuilder.prototype, "forPath")
-    .returnsThis();
   const withParameters = sinon
     .stub(PathItemObjectBuilder.prototype, "withParameters")
     .returnsThis();
@@ -32,7 +29,6 @@ describe("PathsObjectBuilder", () => {
   beforeEach(() => {
     pathsObjectBuilder = new PathsObjectBuilder();
     buildStub.reset();
-    forPath.resetHistory();
     withParameters.resetHistory();
   });
 
@@ -76,9 +72,6 @@ describe("PathsObjectBuilder", () => {
         path
       };
       expect(pathsObjectBuilder.withPath(args).build()).to.deep.equal({});
-
-      expect(forPath.calledOnce).to.be.true;
-      expect(forPath.calledWith(path));
       expect(buildStub.calledOnce).to.be.true;
     });
 
@@ -90,9 +83,6 @@ describe("PathsObjectBuilder", () => {
         parameters: []
       };
       expect(pathsObjectBuilder.withPath(args).build()).to.deep.equal({});
-
-      expect(forPath.calledOnce).to.be.true;
-      expect(forPath.calledWith(path));
       expect(withParameters.calledOnce).to.be.true;
       expect(withParameters.calledWith([])).to.be.true;
       expect(buildStub.calledOnce).to.be.true;
@@ -302,6 +292,28 @@ describe("PathsObjectBuilder", () => {
           .build();
       }).to.throw(
         'Unable to add operation when resource "/path" defined as $ref'
+      );
+    });
+
+    it("should fail when sub-resource path with dynamic parameters could be matched", () => {
+      buildStub.returns({});
+      pathsObjectBuilder
+        .withPath({ path: path + "/extension" })
+        .withPath({ path });
+
+      operation.path = "/:value";
+
+      expect(() => {
+        pathsObjectBuilder.withOperation(operation).build();
+      }).to.throw(
+        'Possible duplicate with resource = "/path/extension" sub-resource = "/path/:value"'
+      );
+
+      operation.path = "/{value}";
+      expect(() => {
+        pathsObjectBuilder.withOperation(operation).build();
+      }).to.throw(
+        'Possible duplicate with resource = "/path/extension" sub-resource = "/path/{value}"'
       );
     });
   });

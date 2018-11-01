@@ -5,12 +5,14 @@ import {
 import { IApiArgs } from "../../decorators/api.decorator";
 import { IOperationObject } from "./operation-object.builder";
 import * as _ from "lodash";
+import { AbstractPathBuilder } from "./abstract-path-builder";
 
 export interface IPathsObject {
   [key: string]: IPathItemObject;
 }
 
-export class PathsObjectBuilder {
+export class PathsObjectBuilder extends AbstractPathBuilder {
+  private pathsTree: any = {};
   private paths: IPathsObject = {};
 
   public withPath(apiArgs: IApiArgs): PathsObjectBuilder {
@@ -27,7 +29,6 @@ export class PathsObjectBuilder {
     }
 
     const builder: PathItemObjectBuilder = new PathItemObjectBuilder();
-    builder.forPath(apiArgs.path);
 
     if (PathsObjectBuilder.hasParameters(apiArgs)) {
       if (apiArgs.$ref) {
@@ -46,6 +47,8 @@ export class PathsObjectBuilder {
     }
 
     this.paths[apiArgs.path] = builder.build();
+    this.registerPath(apiArgs.path);
+
     return this;
   }
 
@@ -77,18 +80,18 @@ export class PathsObjectBuilder {
       builder.merge(item);
     }
 
+    this.checkPossibleDuplicate(path);
+
     builder.withOperation(operation);
 
     this.paths[path] = builder.build();
+    this.registerPath(path);
+
     return this;
   }
 
   public build(): IPathsObject {
     return _.pickBy(this.paths, it => !_.isEmpty(it));
-  }
-
-  private static startsWithSlash(path: string): boolean {
-    return !_.isEmpty(path) && path.startsWith("/");
   }
 
   private containsPath(path: string): boolean {
@@ -101,5 +104,43 @@ export class PathsObjectBuilder {
 
   private static isReference(pathItemObject: IPathItemObject): boolean {
     return pathItemObject.$ref !== undefined;
+  }
+
+  private checkPossibleDuplicate(path: string) {
+    let parts: string | string[] = path.substring(1);
+    parts = parts.split("/");
+
+    let subTree = this.pathsTree;
+    let resource = "";
+    _.each(parts, (part: string) => {
+      if (PathsObjectBuilder.isWildcard(part) && !_.isEmpty(subTree)) {
+        throw new Error(
+          `Possible duplicate with resource = "${resource}/${
+            Object.keys(subTree)[0]
+          }" sub-resource = "${path}"`
+        );
+      }
+      subTree = subTree[part];
+      resource = `${resource}/${part}`;
+    });
+  }
+
+  private static isWildcard(part: string): boolean {
+    return (
+      part.indexOf(":") > -1 || part.indexOf("{") > -1 || part.indexOf("}") > -1
+    );
+  }
+
+  private registerPath(path: string) {
+    let parts: string | string[] = path.substring(1);
+    parts = parts.split("/");
+
+    let subTree = this.pathsTree;
+    _.each(parts, (part: string) => {
+      if (!subTree[part]) {
+        subTree[part] = {};
+      }
+      subTree = subTree[part];
+    });
   }
 }
