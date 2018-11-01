@@ -32,7 +32,7 @@ export {
   SwaggerDefinitionConstant,
   DataType,
   SwaggerScheme,
-    HttpMethod
+  HttpMethod
 } from "./swagger-definition.constant";
 export { express, ISwaggerExpressOptions } from "./express.configurator";
 export { build } from "./swagger.builder";

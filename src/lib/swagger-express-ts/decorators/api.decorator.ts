@@ -3,8 +3,8 @@ import {
   IApiOperationArgsBaseResponse
 } from "../i-api-operation-args.base";
 import { SwaggerService } from "../swagger.service";
-import {OperationObjectBuilder} from "../builders/path/operation-object.builder";
-import {HttpMethod} from "../swagger-definition.constant";
+import { OperationObjectBuilder } from "../builders/path/operation-object.builder";
+import { HttpMethod } from "../swagger-definition.constant";
 
 export interface IApiArgs {
   /**
@@ -86,9 +86,9 @@ export interface IApiOperationArgs {
    */
   deprecated?: boolean;
 
-    /**
-     * Define http method for given operation
-     */
+  /**
+   * Define http method for given operation
+   */
   method: HttpMethod;
 }
 
@@ -126,11 +126,13 @@ export function ApiOperation(args: IApiOperationArgs): MethodDecorator {
       );
     }
 
-      const operationBuilder = new OperationObjectBuilder()
-          .forResource(pathArgs.path)
-          .withOperationId(propertyKey as string)
-          .withArguments(args);
+    const operationBuilder = new OperationObjectBuilder()
+      .forResource(pathArgs.path)
+      .withOperationId(propertyKey as string)
+      .withArguments(args);
 
-    SwaggerService.getInstance().getPathsBuilder().withOperation(operationBuilder.build());
+    SwaggerService.getInstance()
+      .getPathsBuilder()
+      .withOperation(operationBuilder.build());
   };
 }
