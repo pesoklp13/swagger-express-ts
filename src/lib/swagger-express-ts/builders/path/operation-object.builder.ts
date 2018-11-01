@@ -1,14 +1,21 @@
 import {IApiOperationArgs} from "../../decorators/api.decorator";
 import {HttpMethod} from "../../swagger-definition.constant";
+import {ISwaggerOperationResponse} from "../../i-swagger";
 
 export interface IOperationObject {
-  path: string;
-  method: HttpMethod
+  resource: string,
+  path?: string,
+  method: HttpMethod,
+  operationId?: string
+  responses: {
+      [key: string]: ISwaggerOperationResponse;
+  }
 }
 
 export class OperationObjectBuilder {
+
   public build(): IOperationObject {
-    return { path: "", method: HttpMethod.GET };
+    return { resource: "/", method: HttpMethod.GET, responses: {} };
   }
 
     public forResource(path: string): OperationObjectBuilder {
@@ -20,6 +27,6 @@ export class OperationObjectBuilder {
     }
 
     public withOperationId(operationId: string): OperationObjectBuilder {
-    return this;
+        return this;
     }
 }

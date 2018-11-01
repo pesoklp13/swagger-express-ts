@@ -3,13 +3,10 @@ import { IApiArgs } from "../../decorators/api.decorator";
 import { IOperationObject } from "./operation-object.builder";
 
 export interface IPathsObject {
-  [key: string]: IPathItemObject | string;
+  [key: string]: IPathItemObject;
 }
 
 export class PathsObjectBuilder {
-  constructor() {
-    console.log();
-  }
 
   private paths: IPathsObject = {};
 
