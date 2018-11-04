@@ -7,28 +7,26 @@ import { OperationObjectBuilder } from "../builders/path/operation-object.builde
 import { HttpMethod } from "../swagger-definition.constant";
 
 const expect = chai.expect;
+const sandbox = sinon.createSandbox();
 
 describe("Api decorators tests", () => {
   const service = SwaggerService.getInstance();
   const pathsObjectBuilder = {
-    withPath: sinon.stub(),
-    withOperation: sinon.stub()
+    withPath: sandbox.stub(),
+    withOperation: sandbox.stub()
   };
 
-  const forResource = sinon
-    .stub(OperationObjectBuilder.prototype, "forResource")
-    .returnsThis();
-  const withArguments = sinon
+  const withArguments = sandbox
     .stub(OperationObjectBuilder.prototype, "withArguments")
     .returnsThis();
-  const withOperationId = sinon
+  const withOperationId = sandbox
     .stub(OperationObjectBuilder.prototype, "withOperationId")
     .returnsThis();
-  const operationBuild = sinon
+  const operationBuild = sandbox
     .stub(OperationObjectBuilder.prototype, "build")
     .returns({});
 
-  const serviceGetPathsBuilder = sinon
+  const serviceGetPathsBuilder = sandbox
     .stub(service, "getPathsBuilder")
     .returns(pathsObjectBuilder);
   const path = "/path";
@@ -38,6 +36,10 @@ describe("Api decorators tests", () => {
   beforeEach(() => {
     target = {};
     serviceGetPathsBuilder.resetHistory();
+  });
+
+  after(() => {
+    sandbox.restore();
   });
 
   describe("@Api", () => {
@@ -64,8 +66,6 @@ describe("Api decorators tests", () => {
       decorate(target, propertyKey, null);
       expect(serviceGetPathsBuilder.calledOnce).to.be.true;
 
-      expect(forResource.calledOnce).to.be.true;
-      expect(forResource.calledWith(path)).to.be.true;
       expect(withArguments.calledOnce).to.be.true;
       expect(withArguments.calledWith(args)).to.be.true;
       expect(withOperationId.calledOnce).to.be.true;
@@ -73,7 +73,15 @@ describe("Api decorators tests", () => {
       expect(operationBuild.calledOnce).to.be.true;
 
       expect(pathsObjectBuilder.withOperation.calledOnce).to.be.true;
-      expect(pathsObjectBuilder.withOperation.calledWith({})).to.be.true;
+      expect(
+        pathsObjectBuilder.withOperation.calledWith({
+          args: {
+            resource: path,
+            ...args
+          },
+          operation: {}
+        })
+      ).to.be.true;
     });
 
     it("should fail when no metadata set for target", () => {

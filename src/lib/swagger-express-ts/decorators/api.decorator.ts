@@ -127,12 +127,16 @@ export function ApiOperation(args: IApiOperationArgs): MethodDecorator {
     }
 
     const operationBuilder = new OperationObjectBuilder()
-      .forResource(pathArgs.path)
       .withOperationId(propertyKey as string)
       .withArguments(args);
 
+    const wrappedArgs = { resource: pathArgs.path, ...args };
+
     SwaggerService.getInstance()
       .getPathsBuilder()
-      .withOperation(operationBuilder.build());
+      .withOperation({
+        args: wrappedArgs,
+        operation: operationBuilder.build()
+      });
   };
 }

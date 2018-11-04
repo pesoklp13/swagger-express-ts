@@ -1,8 +1,13 @@
 import * as _ from "lodash";
 
+export interface IReferenceObject {
+  $ref: string;
+}
+
 export enum ReferenceType {
   definitions,
   responses
+  // TODO add parameters as type
 }
 
 export class ReferenceBuilder {
@@ -26,6 +31,7 @@ export class ReferenceBuilder {
   // public forDefinitions
   // public forResponses
 
+  // TODO change to build IReferenceObject
   public build(): string {
     return "#/"
       .concat(ReferenceType[this.referenceType])

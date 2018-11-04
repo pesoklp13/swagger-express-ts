@@ -3,32 +3,35 @@ import * as sinon from "sinon";
 import { IApiArgs } from "../../decorators/api.decorator";
 import { PathsObjectBuilder } from "./paths-object.builder";
 import { PathItemObjectBuilder } from "./path-item-object.builder";
-import { IOperationObject } from "./operation-object.builder";
+import {
+  IApiOperationArgsForResource,
+  IOperationObject
+} from "./operation-object.builder";
 import { HttpMethod } from "../../swagger-definition.constant";
 
 const expect = chai.expect;
 
 describe("PathsObjectBuilder", () => {
   let pathsObjectBuilder: PathsObjectBuilder;
+
+  const pathItemObjectBuilder: PathItemObjectBuilder = new PathItemObjectBuilder();
   const withParameters = sinon
-    .stub(PathItemObjectBuilder.prototype, "withParameters")
+    .stub(pathItemObjectBuilder, "withParameters")
     .returnsThis();
-  const merge = sinon
-    .stub(PathItemObjectBuilder.prototype, "merge")
-    .returnsThis();
+  const merge = sinon.stub(pathItemObjectBuilder, "merge").returnsThis();
   const withOperation = sinon
-    .stub(PathItemObjectBuilder.prototype, "withOperation")
+    .stub(pathItemObjectBuilder, "withOperation")
     .returnsThis();
-  const asRef = sinon
-    .stub(PathItemObjectBuilder.prototype, "asRef")
-    .returnsThis();
-  const buildStub = sinon.stub(PathItemObjectBuilder.prototype, "build");
+  const asRef = sinon.stub(pathItemObjectBuilder, "asRef").returnsThis();
+  const buildStub = sinon.stub(pathItemObjectBuilder, "build");
+  const reset = sinon.stub(pathItemObjectBuilder, "reset").returnsThis();
   const path = "/path";
   const $ref = "./references/PathItemObject.yaml";
 
   beforeEach(() => {
-    pathsObjectBuilder = new PathsObjectBuilder();
+    pathsObjectBuilder = new PathsObjectBuilder(pathItemObjectBuilder);
     buildStub.reset();
+    reset.resetHistory();
     withParameters.resetHistory();
   });
 
@@ -71,7 +74,9 @@ describe("PathsObjectBuilder", () => {
       args = {
         path
       };
+
       expect(pathsObjectBuilder.withPath(args).build()).to.deep.equal({});
+      expect(reset.calledOnce).to.be.true;
       expect(buildStub.calledOnce).to.be.true;
     });
 
@@ -82,7 +87,9 @@ describe("PathsObjectBuilder", () => {
         path,
         parameters: []
       };
+
       expect(pathsObjectBuilder.withPath(args).build()).to.deep.equal({});
+      expect(reset.calledOnce).to.be.true;
       expect(withParameters.calledOnce).to.be.true;
       expect(withParameters.calledWith([])).to.be.true;
       expect(buildStub.calledOnce).to.be.true;
@@ -104,6 +111,7 @@ describe("PathsObjectBuilder", () => {
         }
       });
 
+      expect(reset.calledOnce).to.be.true;
       expect(asRef.calledOnce).to.be.true;
       expect(asRef.calledWith($ref)).to.be.true;
     });
@@ -125,23 +133,24 @@ describe("PathsObjectBuilder", () => {
 
   describe("withOperation", () => {
     let operation: IOperationObject;
+    let args: IApiOperationArgsForResource;
+    const method = HttpMethod.GET;
 
     beforeEach(() => {
       operation = {
-        resource: path,
-        method: HttpMethod.GET,
         responses: {}
       };
 
       withOperation.resetHistory();
       merge.resetHistory();
+      args = { resource: path, responses: {}, method: HttpMethod.GET };
     });
 
     it('should fail when path set but not starts with "/"', () => {
-      operation.path = "bad-path";
+      args.path = "bad-path";
 
       expect(() => {
-        pathsObjectBuilder.withOperation(operation).build();
+        pathsObjectBuilder.withOperation({ args, operation }).build();
       }).to.throw(
         'Path has to start with "/" symbol. Actual = "bad-path". Should be "/bad-path"'
       );
@@ -157,20 +166,21 @@ describe("PathsObjectBuilder", () => {
         }
       });
 
-      expect(pathsObjectBuilder.withOperation(operation).build()).to.deep.equal(
-        {
-          "/path": {
-            get: {
-              responses: {}
-            }
+      expect(
+        pathsObjectBuilder.withOperation({ args, operation }).build()
+      ).to.deep.equal({
+        "/path": {
+          get: {
+            responses: {}
           }
         }
-      );
+      });
 
       expect(merge.calledOnce).to.be.true;
       expect(merge.calledWith({})).to.be.true;
       expect(withOperation.calledOnce).to.be.true;
-      expect(withOperation.calledWith(operation)).to.be.true;
+      expect(withOperation.calledWith({ method, ...operation })).to.be.true;
+      expect(reset.calledTwice).to.be.true;
       expect(buildStub.calledTwice).to.be.true;
     });
 
@@ -184,21 +194,22 @@ describe("PathsObjectBuilder", () => {
         }
       });
 
-      expect(pathsObjectBuilder.withOperation(operation).build()).to.deep.equal(
-        {
-          "/path": {
-            get: {
-              responses: {}
-            }
+      expect(
+        pathsObjectBuilder.withOperation({ args, operation }).build()
+      ).to.deep.equal({
+        "/path": {
+          get: {
+            responses: {}
           }
         }
-      );
+      });
 
       expect(merge.calledOnce).to.be.true;
       expect(merge.calledWith({})).to.be.true;
       expect(withOperation.calledOnce).to.be.true;
-      expect(withOperation.calledWith(operation)).to.be.true;
+      expect(withOperation.calledWith({ method, ...operation })).to.be.true;
       expect(buildStub.calledTwice).to.be.true;
+      expect(reset.calledTwice).to.be.true;
     });
 
     it("should add another path item object as sub-resource", () => {
@@ -210,20 +221,21 @@ describe("PathsObjectBuilder", () => {
           responses: {}
         }
       });
-      operation.path = "/extension";
-      expect(pathsObjectBuilder.withOperation(operation).build()).to.deep.equal(
-        {
-          "/path/extension": {
-            get: {
-              responses: {}
-            }
+      args.path = "/extension";
+      expect(
+        pathsObjectBuilder.withOperation({ args, operation }).build()
+      ).to.deep.equal({
+        "/path/extension": {
+          get: {
+            responses: {}
           }
         }
-      );
+      });
 
       expect(withOperation.calledOnce).to.be.true;
-      expect(withOperation.calledWith(operation)).to.be.true;
+      expect(withOperation.calledWith({ method, ...operation })).to.be.true;
       expect(buildStub.calledTwice).to.be.true;
+      expect(reset.calledTwice).to.be.true;
     });
 
     it("should merge with existing path item object", () => {
@@ -235,15 +247,16 @@ describe("PathsObjectBuilder", () => {
           responses: {}
         }
       });
-      pathsObjectBuilder.withOperation(operation);
+      pathsObjectBuilder.withOperation({ args, operation });
 
       expect(merge.calledOnce).to.be.true;
       expect(merge.calledWith({})).to.be.true;
       expect(withOperation.calledOnce).to.be.true;
-      expect(withOperation.calledWith(operation)).to.be.true;
+      expect(withOperation.calledWith({ method, ...operation })).to.be.true;
       expect(buildStub.calledTwice).to.be.true;
+      expect(reset.calledTwice).to.be.true;
 
-      operation.method = HttpMethod.POST;
+      args.method = HttpMethod.POST;
 
       buildStub.returns({
         get: {
@@ -254,7 +267,7 @@ describe("PathsObjectBuilder", () => {
         }
       });
 
-      pathsObjectBuilder.withOperation(operation);
+      pathsObjectBuilder.withOperation({ args, operation });
 
       expect(merge.calledTwice).to.be.true;
       expect(
@@ -265,8 +278,9 @@ describe("PathsObjectBuilder", () => {
         })
       ).to.be.true;
       expect(withOperation.calledTwice).to.be.true;
-      expect(withOperation.calledWith(operation)).to.be.true;
+      expect(withOperation.calledWith({ method, ...operation })).to.be.true;
       expect(buildStub.calledThrice).to.be.true;
+      expect(reset.calledThrice).to.be.true;
 
       expect(pathsObjectBuilder.build()).to.deep.equals({
         "/path": {
@@ -288,7 +302,7 @@ describe("PathsObjectBuilder", () => {
       expect(() => {
         pathsObjectBuilder
           .withPath({ path, $ref })
-          .withOperation(operation)
+          .withOperation({ args, operation })
           .build();
       }).to.throw(
         'Unable to add operation when resource "/path" defined as $ref'
@@ -301,17 +315,17 @@ describe("PathsObjectBuilder", () => {
         .withPath({ path: path + "/extension" })
         .withPath({ path });
 
-      operation.path = "/:value";
+      args.path = "/:value";
 
       expect(() => {
-        pathsObjectBuilder.withOperation(operation).build();
+        pathsObjectBuilder.withOperation({ args, operation }).build();
       }).to.throw(
         'Possible duplicate with resource = "/path/extension" sub-resource = "/path/:value"'
       );
 
-      operation.path = "/{value}";
+      args.path = "/{value}";
       expect(() => {
-        pathsObjectBuilder.withOperation(operation).build();
+        pathsObjectBuilder.withOperation({ args, operation }).build();
       }).to.throw(
         'Possible duplicate with resource = "/path/extension" sub-resource = "/path/{value}"'
       );

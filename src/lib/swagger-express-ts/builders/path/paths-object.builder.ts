@@ -3,7 +3,7 @@ import {
   PathItemObjectBuilder
 } from "./path-item-object.builder";
 import { IApiArgs } from "../../decorators/api.decorator";
-import { IOperationObject } from "./operation-object.builder";
+import { IOperationObjectArgs } from "./operation-object.builder";
 import * as _ from "lodash";
 import { AbstractPathBuilder } from "./abstract-path-builder";
 
@@ -12,6 +12,12 @@ export interface IPathsObject {
 }
 
 export class PathsObjectBuilder extends AbstractPathBuilder {
+  constructor(
+    private pathItemObjectBuilder: PathItemObjectBuilder = new PathItemObjectBuilder()
+  ) {
+    super();
+  }
+
   private pathsTree: any = {};
   private paths: IPathsObject = {};
 
@@ -28,7 +34,7 @@ export class PathsObjectBuilder extends AbstractPathBuilder {
       throw new Error(`Duplicate mapping key "${apiArgs.path}"`);
     }
 
-    const builder: PathItemObjectBuilder = new PathItemObjectBuilder();
+    const builder: PathItemObjectBuilder = this.pathItemObjectBuilder.reset();
 
     if (PathsObjectBuilder.hasParameters(apiArgs)) {
       if (apiArgs.$ref) {
@@ -52,24 +58,28 @@ export class PathsObjectBuilder extends AbstractPathBuilder {
     return this;
   }
 
-  public withOperation(operation: IOperationObject): PathsObjectBuilder {
-    let path = operation.resource;
+  public withOperation(
+    operationWrapper: IOperationObjectArgs
+  ): PathsObjectBuilder {
+    const args = operationWrapper.args;
+    let path = args.resource;
+    const operation = operationWrapper.operation;
 
-    if (!_.isEmpty(operation.path)) {
-      if (!PathsObjectBuilder.startsWithSlash(operation.path)) {
+    if (!_.isEmpty(args.path)) {
+      if (!PathsObjectBuilder.startsWithSlash(args.path)) {
         throw new Error(
           `Path has to start with "/" symbol. Actual = "${
-            operation.path
-          }". Should be "/${operation.path}"`
+            args.path
+          }". Should be "/${args.path}"`
         );
       }
 
-      if (operation.path !== "/") {
-        path = path.concat(operation.path);
+      if (args.path !== "/") {
+        path = path.concat(args.path);
       }
     }
 
-    const builder: PathItemObjectBuilder = new PathItemObjectBuilder();
+    const builder: PathItemObjectBuilder = this.pathItemObjectBuilder.reset();
     if (this.containsPath(path)) {
       const item = this.paths[path];
       if (PathsObjectBuilder.isReference(item)) {
@@ -82,7 +92,7 @@ export class PathsObjectBuilder extends AbstractPathBuilder {
 
     this.checkPossibleDuplicate(path);
 
-    builder.withOperation(operation);
+    builder.withOperation({ method: args.method, ...operation });
 
     this.paths[path] = builder.build();
     this.registerPath(path);

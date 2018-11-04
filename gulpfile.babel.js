@@ -116,7 +116,9 @@ const testScript = () => {
                         junit_report_name: "Tests",
                         junit_report_path: "reports/junit/results.xml",
                         junit_report_stack: 1
-                    }
+                    },
+                    bail: true,
+                    fullStackTrace: true
                 })
             )
     );
