@@ -11,7 +11,7 @@ import {
   ApiOperationGet,
   ApiOperationPost,
   ApiPath,
-  DataType
+  DataType,
 } from "../lib/swagger-express-ts";
 import { VersionsService } from "./versions.service";
 import { VersionModel } from "./version.model";
@@ -36,6 +36,12 @@ export class VersionsController implements interfaces.Controller {
     summary: "Get versions list",
     responses: {
       200: {
+        headers: {
+          "x-custom-header": {
+            type: "string",
+            description: "This is a custom header"
+          }
+        },
         type: DataType.array,
         model: "Version"
       }

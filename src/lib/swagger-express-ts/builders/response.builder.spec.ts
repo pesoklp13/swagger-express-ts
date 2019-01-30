@@ -55,6 +55,34 @@ describe("ResponseBuilder", () => {
     });
   });
 
+  describe("response headers", () => {
+    it("should return response with explicit headers", () => {
+      const expected = {
+        200: {
+          description: "this is a test response",
+          headers: {
+            "x-test-header": {
+              type: "string",
+              description: "this is a test header"
+            }
+          }
+        }
+      };
+
+      const response = {
+        description: "this is a test response",
+        headers: {
+          "x-test-header": {
+            type: "string",
+            description: "this is a test header"
+          }
+        }
+      };
+      responseBuilder.withResponses({ 200: response });
+      expect(responseBuilder.build()).to.be.deep.equal(expected);
+    });
+  });
+
   /**
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject}
    */

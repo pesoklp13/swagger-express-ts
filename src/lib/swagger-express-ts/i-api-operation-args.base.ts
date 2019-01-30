@@ -12,8 +12,14 @@ export interface IApiOperationArgsBaseParameter {
 
 export interface IApiOperationArgsBaseResponse {
   description?: string;
+  headers?: { [key: string]: IApiOperationArgsBaseResponseHeader };
   type?: DataType;
   model?: string | DataType;
+}
+
+export interface IApiOperationArgsBaseResponseHeader {
+  type: string;
+  description: string;
 }
 
 export interface IApiOperationArgsBaseParameters {
