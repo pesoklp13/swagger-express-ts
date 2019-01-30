@@ -44,6 +44,11 @@ export class ResponseBuilder {
           +responseIndex
         );
 
+        ResponseBuilder.handleResponseHeaders(
+          response,
+          newSwaggerOperationResponse
+        );
+
         if (response.model) {
           newSwaggerOperationResponse.schema = this.createResponseByModel(
             response
@@ -58,6 +63,15 @@ export class ResponseBuilder {
       }
     }
     return swaggerOperationResponses;
+  }
+
+  private static handleResponseHeaders(
+    response: IApiOperationArgsBaseResponse,
+    newSwaggerOperationResponse: ISwaggerOperationResponse
+  ) {
+    if (response.hasOwnProperty("headers")) {
+      newSwaggerOperationResponse.headers = response.headers;
+    }
   }
 
   private static handleResponseDescription(

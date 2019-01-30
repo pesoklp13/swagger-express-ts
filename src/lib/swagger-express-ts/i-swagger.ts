@@ -50,6 +50,11 @@ export interface ISwaggerOperationParameter {
   schema?: ISwaggerOperationSchema;
 }
 
+export interface ISwaggerOperationResponseHeader {
+  type?: string;
+  description?: string;
+}
+
 export interface ISwaggerOperationSchema {
   type?: string;
   items?: {
@@ -63,6 +68,7 @@ export interface ISwaggerOperationSchema {
 
 export interface ISwaggerOperationResponse {
   description: string;
+  headers?: ISwaggerOperationResponseHeader;
   schema?: ISwaggerOperationSchema;
 }
 
